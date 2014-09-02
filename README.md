@@ -3,7 +3,6 @@ sdk-base
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
-[![Test coverage][coveralls-image]][coveralls-url]
 [![node version][node-image]][node-url]
 [![Gittip][gittip-image]][gittip-url]
 
@@ -11,8 +10,6 @@ sdk-base
 [npm-url]: https://npmjs.org/package/sdk-base
 [travis-image]: https://img.shields.io/travis/node-modules/sdk-base.svg?style=flat-square
 [travis-url]: https://travis-ci.org/node-modules/sdk-base
-[coveralls-image]: https://img.shields.io/coveralls/node-modules/sdk-base.svg?style=flat-square
-[coveralls-url]: https://coveralls.io/r/node-modules/sdk-base?branch=master
 [node-image]: https://img.shields.io/badge/node.js-%3E=_0.8-green.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
 [gittip-image]: https://img.shields.io/gittip/dead_horse.svg?style=flat-square
