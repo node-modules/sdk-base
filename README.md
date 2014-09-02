@@ -4,7 +4,6 @@ sdk-base
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
-[![David deps][david-image]][david-url]
 [![node version][node-image]][node-url]
 [![Gittip][gittip-image]][gittip-url]
 
@@ -14,9 +13,7 @@ sdk-base
 [travis-url]: https://travis-ci.org/node-modules/sdk-base
 [coveralls-image]: https://img.shields.io/coveralls/node-modules/sdk-base.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/r/node-modules/sdk-base?branch=master
-[david-image]: https://img.shields.io/david/node-modules/sdk-base.svg?style=flat-square
-[david-url]: https://david-dm.org/node-modules/sdk-base
-[node-image]: https://img.shields.io/badge/node.js-%3E=_0.10-green.svg?style=flat-square
+[node-image]: https://img.shields.io/badge/node.js-%3E=_0.8-green.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
 [gittip-image]: https://img.shields.io/gittip/dead_horse.svg?style=flat-square
 [gittip-url]: https://www.gittip.com/dead_horse/
