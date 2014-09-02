@@ -12,8 +12,8 @@ sdk-base
 [travis-url]: https://travis-ci.org/node-modules/sdk-base
 [node-image]: https://img.shields.io/badge/node.js-%3E=_0.8-green.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
-[gittip-image]: https://img.shields.io/gittip/dead_horse.svg?style=flat-square
-[gittip-url]: https://www.gittip.com/dead_horse/
+[gittip-image]: https://img.shields.io/gittip/dead-horse.svg?style=flat-square
+[gittip-url]: https://www.gittip.com/dead-horse/
 
 a base class for sdk with default error handler.
 
