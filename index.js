@@ -16,7 +16,7 @@
  */
 
 var EventEmitter = require('events').EventEmitter;
-var inherits = require('util').inherits;
+var util = require('util');
 
 module.exports = Base;
 
@@ -41,15 +41,28 @@ function Base() {
  * inherits from EventEmitter
  */
 
-inherits(Base, EventEmitter);
+util.inherits(Base, EventEmitter);
 
 Base.prototype.defaultErrorHandler = function (err) {
   if (err.name === 'Error') {
     err.name = this.constructor.name + 'Error';
   }
-  console.error('[%s] ERROR %s [sdk-base] Unhandle %s: %s, stack:\n%s',
+  console.error('[%s] ERROR %s [sdk-base] Unhandle %s: %s \nError Stack:\n  %s',
     Date(), process.pid, err.name, err.message, err.stack);
-  // try to should addition property on the error object
+
+  // try to show addition property on the error object
   // e.g.: `err.data = {url: '/foo'};`
-  console.error(err);
+  var additions = [];
+  for (var key in err) {
+    if (key === 'name' || key === 'message') {
+      continue;
+    }
+
+    additions.push(util.format('  %s: %j', key, err[key]));
+  }
+  if (additions.length) {
+    console.error('Error Additions:');
+    console.error(additions.join('\n'));
+  }
+  // console.error(JSON.stringify(err, null, 2));
 };
