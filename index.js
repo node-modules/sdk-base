@@ -44,11 +44,9 @@ function Base() {
 util.inherits(Base, EventEmitter);
 
 Base.prototype.defaultErrorHandler = function (err) {
-  if (err.name === 'Error') {
-    err.name = this.constructor.name + 'Error';
-  }
-  console.error('\n[%s][pid: %s] %s: %s \nError Stack:\n  %s',
-    Date(), process.pid, err.name, err.message, err.stack);
+  console.error('\n[%s][pid: %s][%s][%s] %s: %s \nError Stack:\n  %s',
+    Date(), process.pid, this.constructor.name, __filename, err.name,
+    err.message, err.stack);
 
   // try to show addition property on the error object
   // e.g.: `err.data = {url: '/foo'};`
