@@ -47,7 +47,7 @@ Base.prototype.defaultErrorHandler = function (err) {
   if (err.name === 'Error') {
     err.name = this.constructor.name + 'Error';
   }
-  console.error('[%s] ERROR %s [sdk-base] Unhandle %s: %s \nError Stack:\n  %s',
+  console.error('\n[%s][pid: %s] %s: %s \nError Stack:\n  %s',
     Date(), process.pid, err.name, err.message, err.stack);
 
   // try to show addition property on the error object
@@ -61,8 +61,7 @@ Base.prototype.defaultErrorHandler = function (err) {
     additions.push(util.format('  %s: %j', key, err[key]));
   }
   if (additions.length) {
-    console.error('Error Additions:');
-    console.error(additions.join('\n'));
+    console.error('Error Additions:\n%s', additions.join('\n'));
   }
-  // console.error(JSON.stringify(err, null, 2));
+  console.error();
 };
