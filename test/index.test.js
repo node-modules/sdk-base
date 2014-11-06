@@ -33,6 +33,8 @@ describe('sdk-base', function () {
         c.listeners('error').length.should.equal(1);
         var err = new Error('mock error 1');
         err.data = {foo: 'bar', url: '/foo'};
+        err.status = 500;
+        err.type = 'DUMP';
         c.emit('error', err);
         // should stderror output
         // [Thu Nov 06 2014 11:14:33 GMT+0800 (CST)] ERROR 63189 [sdk-base] Unhandle SomeServiceClientError: mock error 1, stack:
