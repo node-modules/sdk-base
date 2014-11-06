@@ -17,9 +17,12 @@
     "url": "git@github.com:node-modules/sdk-base"
   },
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+
+  },
   "devDependencies": {
     "autod": "~0.3.2",
+    "istanbul": "*",
     "mocha": "~1.21.4",
     "should": "~4.0.4"
   },

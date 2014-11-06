@@ -1,7 +1,12 @@
-/*!
+/**!
  * sdk-base - index.js
- * Copyright(c) 2014 dead_horse <dead_horse@qq.com>
+ *
+ * Copyright(c) dead_horse and other contributors.
  * MIT Licensed
+ *
+ * Authors:
+ * 	 dead_horse <dead_horse@qq.com>
+ *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.github.com)
  */
 
 'use strict';
@@ -19,12 +24,16 @@ var defer = global.setImmediate
   ? setImmediate
   : process.nextTick;
 
-function Base () {
+function Base() {
   // defer bind default error handler
-  var self = this;
   defer(function () {
-    if (!self.listeners('error').length) self.on('error', onerror);
-  });
+    if (!this.listeners('error').length) {
+      /**
+       * default error handler
+       */
+      this.on('error', this.defaultErrorHandler.bind(this));
+    }
+  }.bind(this));
   EventEmitter.call(this);
 }
 
@@ -34,10 +43,13 @@ function Base () {
 
 inherits(Base, EventEmitter);
 
-/**
- * default error handler
- */
-
-function onerror(err) {
-  if (process.env.NODE_ENV !== 'test') console.error(err.stack);
-}
+Base.prototype.defaultErrorHandler = function (err) {
+  if (err.name === 'Error') {
+    err.name = this.constructor.name + 'Error';
+  }
+  console.error('[%s] ERROR %s [sdk-base] Unhandle %s: %s, stack:\n%s',
+    Date(), process.pid, err.name, err.message, err.stack);
+  // try to should addition property on the error object
+  // e.g.: `err.data = {url: '/foo'};`
+  console.error(err);
+};
