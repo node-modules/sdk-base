@@ -1,13 +1,13 @@
 TESTS = test/*.test.js
-REPORTER = tap
-TIMEOUT = 3000
+REPORTER = spec
+TIMEOUT = 1000
 MOCHA_OPTS =
 
 install:
 	@npm install --registry=http://registry.npm.taobao.org
 
 test:
-	@NODE_ENV=test ./node_modules/mocha/bin/mocha \
+	@NODE_ENV=test ./node_modules/.bin/mocha \
 		--reporter $(REPORTER) \
 		--timeout $(TIMEOUT) \
 		--require should \

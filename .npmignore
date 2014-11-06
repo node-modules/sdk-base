@@ -1,5 +1,6 @@
-benchmark/
 test/
-cov/
+covrage/
+.travis.yml
+.editorconfig
 Makefile
-covrage.html
+.jshint*
