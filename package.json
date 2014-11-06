@@ -6,7 +6,13 @@
   "scripts": {
     "test": "make test"
   },
-  "keywords": [],
+  "keywords": [
+    "sdk",
+    "error"
+  ],
+  "files": [
+    "index.js"
+  ],
   "author": {
     "name": "dead_horse",
     "email": "dead_horse@qq.com",

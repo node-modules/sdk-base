@@ -1,6 +1,0 @@
-test/
-covrage/
-.travis.yml
-.editorconfig
-Makefile
-.jshint*
