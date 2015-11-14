@@ -1,12 +1,10 @@
-/**!
- * sdk-base - test/index.test.js
- *
+/**
  * Copyright(c) dead_horse and other contributors.
  * MIT Licensed
  *
  * Authors:
  * 	 dead_horse <dead_horse@qq.com>
- *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.github.com)
+ *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.com)
  */
 
 'use strict';
@@ -80,6 +78,16 @@ describe('sdk-base', function () {
         c.emit('error', new Error('mock error 2'));
         done();
       }, 10);
+    });
+  });
+
+  describe('ready', function() {
+    it('should ready once', function(done) {
+      var client = new SomeServiceClient();
+      client.ready(done);
+      client.ready(true);
+      // again should work
+      client.ready(true);
     });
   });
 });
