@@ -6,7 +6,6 @@ sdk-base
 [![Test coverage][coveralls-image]][coveralls-url]
 [![Gittip][gittip-image]][gittip-url]
 [![David deps][david-image]][david-url]
-[![node version][node-image]][node-url]
 [![npm download][download-image]][download-url]
 
 [npm-image]: https://img.shields.io/npm/v/sdk-base.svg?style=flat-square
@@ -19,8 +18,6 @@ sdk-base
 [gittip-url]: https://www.gittip.com/dead-horse/
 [david-image]: https://img.shields.io/david/node-modules/sdk-base.svg?style=flat-square
 [david-url]: https://david-dm.org/node-modules/sdk-base
-[node-image]: https://img.shields.io/badge/node.js-%3E=_0.8-green.svg?style=flat-square
-[node-url]: http://nodejs.org/download/
 [download-image]: https://img.shields.io/npm/dm/sdk-base.svg?style=flat-square
 [download-url]: https://npmjs.org/package/sdk-base
 
@@ -45,6 +42,28 @@ function Client() {
 
 util.inherits(Client, Base);
 ```
+
+### API
+
+- `.ready(flagOrFunction)`
+
+    ```js
+    // init ready
+    client.ready(true);
+    // listen client ready
+    client.ready(function() {
+      console.log('client is ready');
+    });
+    ```
+
+- `.on(event, listener)`
+
+    ```js
+    // listen error event
+    client.on('error', function(err) {
+      console.error(err.stack);
+    });
+    ```
 
 ### License
 

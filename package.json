@@ -4,7 +4,8 @@
   "description": "a base class for sdk with default error handler",
   "main": "index.js",
   "scripts": {
-    "test": "make test"
+    "test": "mocha -R spec -t 5000 -r should test/*.test.js",
+    "test-cov": "istanbul cover _mocha -- -t 5000 -r should test/*.test.js"
   },
   "keywords": [
     "sdk",
@@ -24,15 +25,14 @@
   },
   "license": "MIT",
   "dependencies": {
-
+    "get-ready": "~1.0.0"
   },
   "devDependencies": {
-    "autod": "~0.3.2",
     "istanbul": "*",
-    "mocha": "~1.21.4",
-    "should": "~4.0.4"
+    "mocha": "*",
+    "should": "7"
   },
   "engine": {
-    "node": ">=0.8"
+    "node": ">=0.10"
   }
 }

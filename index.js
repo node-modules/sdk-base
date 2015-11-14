@@ -1,12 +1,10 @@
-/**!
- * sdk-base - index.js
- *
+/**
  * Copyright(c) dead_horse and other contributors.
  * MIT Licensed
  *
  * Authors:
  * 	 dead_horse <dead_horse@qq.com>
- *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.github.com)
+ *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.com)
  */
 
 'use strict';
@@ -15,6 +13,7 @@
  * Module dependencies.
  */
 
+var ready = require('get-ready');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
@@ -42,6 +41,8 @@ function Base() {
  */
 
 util.inherits(Base, EventEmitter);
+
+ready.mixin(Base.prototype);
 
 Base.prototype.defaultErrorHandler = function (err) {
   console.error('\n[%s][pid: %s][%s][%s] %s: %s \nError Stack:\n  %s',
