@@ -1,4 +1,10 @@
 
+1.1.0 / 2015-11-14 
+==================
+
+  * refactor: drop 0.8 support
+  * feat: support ready(flagOrFunction)
+
 1.0.1 / 2014-11-06
 ==================
 
