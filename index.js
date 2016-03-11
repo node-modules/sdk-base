@@ -33,7 +33,7 @@ util.inherits(Base, EventEmitter);
 ready.mixin(Base.prototype);
 
 Base.prototype.defaultErrorHandler = function (err) {
-  if (this._events.error.length > 1) {
+  if (this.listeners('error').length > 1) {
     // ignore defaultErrorHandler
     return;
   }
