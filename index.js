@@ -19,21 +19,9 @@ var util = require('util');
 
 module.exports = Base;
 
-var defer = global.setImmediate
-  ? setImmediate
-  : process.nextTick;
-
 function Base() {
-  // defer bind default error handler
-  defer(function () {
-    if (!this.listeners('error').length) {
-      /**
-       * default error handler
-       */
-      this.on('error', this.defaultErrorHandler.bind(this));
-    }
-  }.bind(this));
   EventEmitter.call(this);
+  this.on('error', this.defaultErrorHandler.bind(this));
 }
 
 /**
@@ -45,6 +33,10 @@ util.inherits(Base, EventEmitter);
 ready.mixin(Base.prototype);
 
 Base.prototype.defaultErrorHandler = function (err) {
+  if (this._events.error.length > 1) {
+    // ignore defaultErrorHandler
+    return;
+  }
   console.error('\n[%s][pid: %s][%s][%s] %s: %s \nError Stack:\n  %s',
     Date(), process.pid, this.constructor.name, __filename, err.name,
     err.message, err.stack);
