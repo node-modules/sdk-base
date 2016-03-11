@@ -1,10 +1,15 @@
 
+2.0.1 / 2016-03-11
+==================
+
+  * fix: use event.listeners
+
 2.0.0 / 2016-03-11
 ==================
 
   * refactor: listen on error synchronous
 
-1.1.0 / 2015-11-14 
+1.1.0 / 2015-11-14
 ==================
 
   * refactor: drop 0.8 support
