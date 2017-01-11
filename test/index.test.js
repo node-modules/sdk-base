@@ -1,34 +1,18 @@
-/**
- * Copyright(c) dead_horse and other contributors.
- * MIT Licensed
- *
- * Authors:
- * 	 dead_horse <dead_horse@qq.com>
- *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.com)
- */
-
 'use strict';
 
-/**
- * Module dependencies.
- */
+const Base = require('..');
+const assert = require('assert');
+const pedding = require('pedding');
 
-var inherits = require('util').inherits;
-var Base = require('..');
+describe('sdk-base', () => {
+  class SomeServiceClient extends Base {}
 
-describe('sdk-base', function () {
-  function SomeServiceClient() {
-    Base.call(this);
-  }
-
-  inherits(SomeServiceClient, Base);
-
-  describe('default error handler', function () {
-    it('should auto add the default error handler and show error message', function () {
-      var c = new SomeServiceClient();
-      c.listeners('error').length.should.equal(1);
-      var err = new Error('mock error 1');
-      err.data = {foo: 'bar', url: '/foo'};
+  describe('default error handler', () => {
+    it('should auto add the default error handler and show error message', () => {
+      const c = new SomeServiceClient();
+      assert(c.listeners('error').length === 1);
+      const err = new Error('mock error 1');
+      err.data = { foo: 'bar', url: '/foo' };
       err.status = 500;
       err.type = 'DUMP';
       c.emit('error', err);
@@ -42,11 +26,11 @@ describe('sdk-base', function () {
       //   name: 'SomeServiceClientError' }
     });
 
-    it('should not change the error name and show error message', function (done) {
-      var c = new SomeServiceClient();
-      setTimeout(function () {
-        c.listeners('error').length.should.equal(1);
-        var err = new Error('mock some error');
+    it('should not change the error name and show error message', done => {
+      const c = new SomeServiceClient();
+      setTimeout(function() {
+        assert(c.listeners('error').length === 1);
+        const err = new Error('mock some error');
         err.name = 'SomeApiError';
         c.emit('error', err);
         // should stderr output
@@ -61,26 +45,198 @@ describe('sdk-base', function () {
     });
   });
 
-  describe('custom error handler and do not show error message', function () {
-    it('should use the exists error handler', function (done) {
-      var c = new SomeServiceClient();
-      c.on('error', function (err) {
-        err.message.should.equal('mock error 2');
+  describe('custom error handler and do not show error message', () => {
+    it('should use the exists error handler', done => {
+      const c = new SomeServiceClient();
+      c.on('error', function(err) {
+        assert(err.message === 'mock error 2');
         done();
       });
-      c.listeners('error').length.should.equal(2);
+      assert(c.listeners('error').length === 2);
       c.emit('error', new Error('mock error 2'));
       // should not stderr output
     });
   });
 
-  describe('ready', function() {
-    it('should ready once', function(done) {
-      var client = new SomeServiceClient();
+  describe('ready', () => {
+    it('should ready once', done => {
+      const client = new SomeServiceClient();
       client.ready(done);
       client.ready(true);
       // again should work
       client.ready(true);
+    });
+  });
+
+  describe('options.initMethod', () => {
+    class Client extends Base {
+      constructor() {
+        super({
+          initMethod: 'init',
+        });
+      }
+
+      * init() {
+        yield cb => setTimeout(cb, 500);
+        this.foo = 'bar';
+      }
+    }
+
+    it('should auto init with options.initMethod', function* () {
+      const client = new Client();
+      assert(client.foo === undefined);
+      yield client.ready();
+      yield client.ready();
+      assert(client.foo === 'bar');
+    });
+
+    it('should trigger ready callback without err', done => {
+      const client = new Client();
+      client.ready(err => {
+        assert.ifError(err);
+        done();
+      });
+    });
+  });
+
+  describe('this.ready(err)', () => {
+    class ErrorClient extends Base {
+      constructor() {
+        super({
+          initMethod: 'init',
+        });
+      }
+
+      * init() {
+        yield cb => setTimeout(() => {
+          cb(new Error('init error'));
+        }, 500);
+      }
+    }
+
+    it('should ready failed', function* () {
+      const client = new ErrorClient();
+      let initError = null;
+      try {
+        yield client.ready();
+      } catch (err) {
+        initError = err;
+      }
+      assert(initError && initError.message === 'init error');
+
+      initError = null;
+      try {
+        yield client.ready();
+      } catch (err) {
+        initError = err;
+      }
+      assert(initError && initError.message === 'init error');
+    });
+
+    it('should trigger ready callback with err', done => {
+      const client = new ErrorClient();
+      client.ready(err => {
+        assert(err && err.message === 'init error');
+        done();
+      });
+    });
+
+    it('should emit error if ready failed', done => {
+      const client = new ErrorClient();
+      client.once('error', err => {
+        assert(err.message === 'init error');
+        done();
+      });
+    });
+  });
+
+  describe('generator event listener', () => {
+    it('should add generator listener', done => {
+      done = pedding(done, 8);
+      const client = new SomeServiceClient();
+
+      client.addListener('event_code', function* (a, b) {
+        console.log('event_code in addListener');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.on('event_code', function* (a, b) {
+        console.log('event_code in on');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.once('event_code', function* (a, b) {
+        console.log('event_code in once');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.prependListener('event_code', function* (a, b) {
+        console.log('event_code in prependListener');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.prependOnceListener('event_code', function* (a, b) {
+        console.log('event_code in prependOnceListener');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.emit('event_code', 1, 2);
+      client.emit('event_code', 1, 2);
+    });
+
+    it('should catch generator exception and emit on error event', done => {
+      done = pedding(done, 2);
+      const client = new SomeServiceClient();
+      client.on('error', err => {
+        assert(err.name === 'EventListenerProcessError');
+        assert(err.message === 'generator process exception');
+        done();
+      });
+
+      client.on('event_code', function* () {
+        throw new Error('generator process exception');
+      });
+
+      client.once('event_code', function* () {
+        throw new Error('generator process exception');
+      });
+
+      client.emit('event_code');
+    });
+
+    it('should remove generator listener', done => {
+      const client = new SomeServiceClient();
+      const handler = function* (data) {
+        assert(data === 1);
+        done();
+      };
+      client.on('event_code', data => {
+        assert(data === 1);
+        console.log('normal listener');
+      });
+      client.on('event_code', handler);
+      client.emit('event_code', 1);
+      client.removeListener('event_code', handler);
+      assert(client.listeners('event_code').length === 0);
+    });
+
+    it('should not allow to add generator listener on error event', () => {
+      const client = new SomeServiceClient();
+      assert.throws(() => {
+        client.on('error', function* (err) {
+          console.error(err);
+        });
+      }, '[sdk-base] `error` event should not have a generator listener.');
     });
   });
 });

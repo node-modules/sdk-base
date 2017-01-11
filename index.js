@@ -1,58 +1,149 @@
-/**
- * Copyright(c) dead_horse and other contributors.
- * MIT Licensed
- *
- * Authors:
- * 	 dead_horse <dead_horse@qq.com>
- *   fengmk2 <fengmk2@gmail.com> (http://fengmk2.com)
- */
-
 'use strict';
 
-/**
- * Module dependencies.
- */
+const co = require('co');
+const util = require('util');
+const is = require('is-type-of');
+const assert = require('assert');
+const EventEmitter = require('events').EventEmitter;
 
-var ready = require('get-ready');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
+class Base extends EventEmitter {
+  constructor(options) {
+    super();
 
-module.exports = Base;
+    if (options && options.initMethod) {
+      assert(is.generatorFunction(this[options.initMethod]),
+        `[sdk-base] this.${options.initMethod} should be a generator function.`);
 
-function Base() {
-  EventEmitter.call(this);
-  this.on('error', this.defaultErrorHandler.bind(this));
-}
+      co(this[options.initMethod].bind(this))
+        .then(() => this.ready(true))
+        .catch(err => this.ready(err));
+    }
+    this._ready = false;
+    this._readyError = null;
+    this._readyCallbacks = [];
 
-/**
- * inherits from EventEmitter
- */
-
-util.inherits(Base, EventEmitter);
-
-ready.mixin(Base.prototype);
-
-Base.prototype.defaultErrorHandler = function (err) {
-  if (this.listeners('error').length > 1) {
-    // ignore defaultErrorHandler
-    return;
+    this.on('error', err => { this._defaultErrorHandler(err); });
   }
-  console.error('\n[%s][pid: %s][%s][%s] %s: %s \nError Stack:\n  %s',
-    Date(), process.pid, this.constructor.name, __filename, err.name,
-    err.message, err.stack);
 
-  // try to show addition property on the error object
-  // e.g.: `err.data = {url: '/foo'};`
-  var additions = [];
-  for (var key in err) {
-    if (key === 'name' || key === 'message') {
-      continue;
+  _wrapListener(eventName, listener) {
+    if (is.generatorFunction(listener)) {
+      assert(eventName !== 'error', '[sdk-base] `error` event should not have a generator listener.');
+
+      const newListener = (...args) => {
+        co(function* () {
+          yield listener(...args);
+        }).catch(err => {
+          err.name = 'EventListenerProcessError';
+          this.emit('error', err);
+        });
+      };
+      newListener.original = listener;
+      return newListener;
+    }
+    return listener;
+  }
+
+  addListener(eventName, listener) {
+    return super.addListener(eventName, this._wrapListener(eventName, listener));
+  }
+
+  on(eventName, listener) {
+    return super.on(eventName, this._wrapListener(eventName, listener));
+  }
+
+  once(eventName, listener) {
+    return super.once(eventName, this._wrapListener(eventName, listener));
+  }
+
+  prependListener(eventName, listener) {
+    return super.prependListener(eventName, this._wrapListener(eventName, listener));
+  }
+
+  prependOnceListener(eventName, listener) {
+    return super.prependOnceListener(eventName, this._wrapListener(eventName, listener));
+  }
+
+  removeListener(eventName, listener) {
+    let target = listener;
+    if (is.generatorFunction(listener)) {
+      const listeners = this.listeners(eventName);
+      for (const fn of listeners) {
+        if (fn.original === listener) {
+          target = fn;
+          break;
+        }
+      }
+    }
+    return super.removeListener(eventName, target);
+  }
+
+  /**
+   * set ready state or onready callback
+   *
+   * @param {Boolean|Error|Function} flagOrFunction - ready state or callback function
+   * @return {void|Promise} ready promise
+   */
+  ready(flagOrFunction) {
+    if (arguments.length === 0) {
+      // return a promise
+      // support `this.ready().then(onready);` and `yield this.ready()`;
+      return new Promise((resolve, reject) => {
+        if (this._ready) {
+          return resolve();
+        } else if (this._readyError) {
+          return reject(this._readyError);
+        }
+        this._readyCallbacks.push(err => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+    } else if (is.function(flagOrFunction)) {
+      this._readyCallbacks.push(flagOrFunction);
+    } else if (flagOrFunction instanceof Error) {
+      this._ready = false;
+      this._readyError = flagOrFunction;
+      this.emit('error', flagOrFunction);
+    } else {
+      this._ready = flagOrFunction;
     }
 
-    additions.push(util.format('  %s: %j', key, err[key]));
+    if (this._ready || this._readyError) {
+      this._readyCallbacks.splice(0, Infinity).forEach(callback => {
+        process.nextTick(() => {
+          callback(this._readyError);
+        });
+      });
+    }
   }
-  if (additions.length) {
-    console.error('Error Additions:\n%s', additions.join('\n'));
+
+  _defaultErrorHandler(err) {
+    if (this.listeners('error').length > 1) {
+      // ignore defaultErrorHandler
+      return;
+    }
+    console.error('\n[%s][pid: %s][%s] %s: %s \nError Stack:\n  %s',
+      Date(), process.pid, this.constructor.name, err.name,
+      err.message, err.stack);
+
+    // try to show addition property on the error object
+    // e.g.: `err.data = {url: '/foo'};`
+    const additions = [];
+    for (const key in err) {
+      if (key === 'name' || key === 'message') {
+        continue;
+      }
+
+      additions.push(util.format('  %s: %j', key, err[key]));
+    }
+    if (additions.length) {
+      console.error('Error Additions:\n%s', additions.join('\n'));
+    }
+    console.error();
   }
-  console.error();
-};
+}
+
+module.exports = Base;
