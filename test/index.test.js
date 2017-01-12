@@ -70,21 +70,26 @@ describe('sdk-base', () => {
 
   describe('options.initMethod', () => {
     class Client extends Base {
-      constructor() {
-        super({
+      constructor(options) {
+        super(Object.assign({
           initMethod: 'init',
-        });
+        }, options));
+        this.foo = 'foo';
       }
 
       * init() {
+        assert(this.foo === 'foo');
         yield cb => setTimeout(cb, 500);
         this.foo = 'bar';
       }
     }
 
     it('should auto init with options.initMethod', function* () {
-      const client = new Client();
-      assert(client.foo === undefined);
+      const client = new Client({ a: 'a' });
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
       yield client.ready();
       yield client.ready();
       assert(client.foo === 'bar');
