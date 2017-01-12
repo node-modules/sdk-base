@@ -4,8 +4,11 @@
   "description": "a base class for sdk with default error handler",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -R spec -t 5000 -r should test/*.test.js",
-    "test-cov": "istanbul cover _mocha -- -t 5000 -r should test/*.test.js"
+    "lint": "eslint --ext .js .",
+    "test": "npm run lint && npm run test-local",
+    "test-local": "egg-bin test",
+    "cov": "egg-bin cov",
+    "ci": "npm run lint && npm run cov"
   },
   "keywords": [
     "sdk",
@@ -25,14 +28,20 @@
   },
   "license": "MIT",
   "dependencies": {
-    "get-ready": "~1.0.0"
+    "co": "^4.6.0",
+    "is-type-of": "^1.0.0"
   },
   "devDependencies": {
-    "istanbul": "*",
-    "mocha": "*",
-    "should": "7"
+    "egg-bin": "^1.10.0",
+    "egg-ci": "^1.1.0",
+    "eslint": "^3.13.1",
+    "eslint-config-egg": "^3.2.0",
+    "pedding": "^1.1.0"
   },
   "engine": {
-    "node": ">=0.10"
+    "node": ">= 6.0.0"
+  },
+  "ci": {
+    "version": "6, 7"
   }
 }
