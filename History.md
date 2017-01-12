@@ -1,4 +1,9 @@
 
+3.0.0 / 2017-01-12
+==================
+
+  * feat: [BREAKING_CHANGE] add ready with error and generator listener (#5)
+
 2.0.1 / 2016-03-11
 ==================
 
