@@ -122,7 +122,7 @@ co(function* () {
   });
   ```
 
-- `.await(event)`: await an event, return a promise, and it will resolve(reject if event is `error`) once this event emmited.
+- `.await(event)`: [await an event](https://github.com/cojs/await-event), return a promise, and it will resolve(reject if event is `error`) once this event emmited.
 
   ```js
   co(function* () {
