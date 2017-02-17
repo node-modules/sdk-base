@@ -36,42 +36,42 @@ Constructor argument:
 - {Object} options
   - {String} [initMethod] - the async init method name, the method should be a generator function. If set, will execute the function in the constructor.
 
-```js
-'use strict';
+  ```js
+  'use strict';
 
-const co = require('co');
-const Base = require('sdk-base');
+  const co = require('co');
+  const Base = require('sdk-base');
 
-class Client extends Base {
-  constructor() {
-    super({
-      initMethod: 'init',
+  class Client extends Base {
+    constructor() {
+      super({
+        initMethod: 'init',
+      });
+    }
+
+    * init() {
+      // put your async init logic here
+    }
+  }
+
+  co(function* () {
+    const client = new Client();
+    // wait client ready, if init failed, client will throw an error.
+    yield client.ready();
+
+    // support generator event listener
+    client.on('data', function* (data) {
+      // put your async process logic here
+      //
+      // @example
+      // ----------
+      // yield submit(data);
     });
-  }
 
-  * init() {
-    // put your async init logic here
-  }
-}
+    client.emit('data', { foo: 'bar' });
 
-co(function* () {
-  const client = new Client();
-  // wait client ready, if init failed, client will throw an error.
-  yield client.ready();
-
-  // support generator event listener
-  client.on('data', function* (data) {
-    // put your async process logic here
-    //
-    // @example
-    // ----------
-    // yield submit(data);
-  });
-
-  client.emit('data', { foo: 'bar' });
-
-}).catch(err => { console.error(err); });
-```
+  }).catch(err => { console.error(err); });
+  ```
 
 ### API
 
@@ -132,4 +132,4 @@ co(function* () {
 
 ### License
 
-MIT
+[MIT](LICENSE)
