@@ -36,71 +36,71 @@ Constructor argument:
 - {Object} options
   - {String} [initMethod] - the async init method name, the method should be a generator function. If set, will execute the function in the constructor.
 
-```js
-'use strict';
+  ```js
+  'use strict';
 
-const co = require('co');
-const Base = require('sdk-base');
+  const co = require('co');
+  const Base = require('sdk-base');
 
-class Client extends Base {
-  constructor() {
-    super({
-      initMethod: 'init',
+  class Client extends Base {
+    constructor() {
+      super({
+        initMethod: 'init',
+      });
+    }
+
+    * init() {
+      // put your async init logic here
+    }
+  }
+
+  co(function* () {
+    const client = new Client();
+    // wait client ready, if init failed, client will throw an error.
+    yield client.ready();
+
+    // support generator event listener
+    client.on('data', function* (data) {
+      // put your async process logic here
+      //
+      // @example
+      // ----------
+      // yield submit(data);
     });
-  }
 
-  * init() {
-    // put your async init logic here
-  }
-}
+    client.emit('data', { foo: 'bar' });
 
-co(function* () {
-  const client = new Client();
-  // wait client ready, if init failed, client will throw an error.
-  yield client.ready();
-
-  // support generator event listener
-  client.on('data', function* (data) {
-    // put your async process logic here
-    //
-    // @example
-    // ----------
-    // yield submit(data);
-  });
-
-  client.emit('data', { foo: 'bar' });
-
-}).catch(err => { console.error(err); });
-```
+  }).catch(err => { console.error(err); });
+  ```
 
 ### API
 
 - `.ready(flagOrFunction)` flagOrFunction is optional, and the argument type can be Boolean, Error or Function.
 
-    ```js
-    // init ready
-    client.ready(true);
-    // init failed
-    client.ready(new Error('init failed'));
+  ```js
+  // init ready
+  client.ready(true);
+  // init failed
+  client.ready(new Error('init failed'));
 
-    // listen client ready
-    client.ready(err => {
-      if (err) {
-        console.log('client init failed');
-        console.error(err);
-        return;
-      }
-      console.log('client is ready');
-    });
+  // listen client ready
+  client.ready(err => {
+    if (err) {
+      console.log('client init failed');
+      console.error(err);
+      return;
+    }
+    console.log('client is ready');
+  });
 
-    // support promise style call
-    client.ready()
-      .then(() => { ... })
-      .catch(err => { ... });
+  // support promise style call
+  client.ready()
+    .then(() => { ... })
+    .catch(err => { ... });
 
-    // support generator style call
-    yield client.ready();
-    ```
+  // support generator style call
+  yield client.ready();
+  ```
 
 - `.on(event, listener)` wrap the [EventEmitter.prototype.on(event, listener)](https://nodejs.org/api/events.html#events_emitter_on_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
 - `once(event, listener)` wrap the [EventEmitter.prototype.once(event, listener)](https://nodejs.org/api/events.html#events_emitter_once_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
@@ -108,20 +108,28 @@ co(function* () {
 - `prependOnceListener(event, listener)` wrap the [EventEmitter.prototype.prependOnceListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependoncelistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
 - `addListener(event, listener)` wrap the [EventEmitter.prototype.addListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_addlistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
 
-    ```js
-    client.on('data', function* (data) {
-      // your async process logic here
-    });
-    client.once('foo', function* (bar) {
-      // ...
-    });
+  ```js
+  client.on('data', function* (data) {
+    // your async process logic here
+  });
+  client.once('foo', function* (bar) {
+    // ...
+  });
 
-    // listen error event
-    client.on('error', function(err) {
-      console.error(err.stack);
-    });
-    ```
+  // listen error event
+  client.on('error', function(err) {
+    console.error(err.stack);
+  });
+  ```
+
+- `.await(event)`: [await an event](https://github.com/cojs/await-event), return a promise, and it will resolve(reject if event is `error`) once this event emmited.
+
+  ```js
+  co(function* () {
+    const data = yield client.await('data');
+  });
+  ```
 
 ### License
 
-MIT
+[MIT](LICENSE)

@@ -4,6 +4,7 @@ const co = require('co');
 const util = require('util');
 const is = require('is-type-of');
 const assert = require('assert');
+const awaitEvent = require('await-event');
 const EventEmitter = require('events').EventEmitter;
 
 class Base extends EventEmitter {
@@ -24,6 +25,9 @@ class Base extends EventEmitter {
     this._ready = false;
     this._readyError = null;
     this._readyCallbacks = [];
+
+    // support `yield this.await('event')`
+    this.await = awaitEvent;
 
     this.on('error', err => { this._defaultErrorHandler(err); });
   }

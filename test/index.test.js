@@ -244,4 +244,13 @@ describe('sdk-base', () => {
       }, '[sdk-base] `error` event should not have a generator listener.');
     });
   });
+
+  describe('await', () => {
+    it('should support client.await', function* () {
+      const client = new SomeServiceClient();
+      setTimeout(() => client.emit('someEvent', 'foo'), 100);
+      const res = yield client.await('someEvent');
+      assert(res === 'foo');
+    });
+  });
 });
