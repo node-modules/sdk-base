@@ -153,6 +153,17 @@ describe('sdk-base', () => {
         done();
       });
     });
+
+    it('should not emit error event if readyCallback not empty', done => {
+      const client = new ErrorClient();
+      client.ready(err => {
+        assert(err.message === 'init error');
+        setImmediate(done);
+      });
+      client.once('error', () => {
+        done(new Error('should not run here'));
+      });
+    });
   });
 
   describe('generator event listener', () => {
