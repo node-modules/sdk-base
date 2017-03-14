@@ -113,7 +113,9 @@ class Base extends EventEmitter {
     } else if (flagOrFunction instanceof Error) {
       this._ready = false;
       this._readyError = flagOrFunction;
-      this.emit('error', flagOrFunction);
+      if (!this._readyCallbacks.length) {
+        this.emit('error', flagOrFunction);
+      }
     } else {
       this._ready = flagOrFunction;
     }
