@@ -4,7 +4,6 @@ sdk-base
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
-[![Gittip][gittip-image]][gittip-url]
 [![David deps][david-image]][david-url]
 [![npm download][download-image]][download-url]
 
@@ -14,8 +13,6 @@ sdk-base
 [travis-url]: https://travis-ci.org/node-modules/sdk-base
 [coveralls-image]: https://img.shields.io/coveralls/node-modules/sdk-base.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/r/node-modules/sdk-base?branch=master
-[gittip-image]: https://img.shields.io/gittip/dead-horse.svg?style=flat-square
-[gittip-url]: https://www.gittip.com/dead-horse/
 [david-image]: https://img.shields.io/david/node-modules/sdk-base.svg?style=flat-square
 [david-url]: https://david-dm.org/node-modules/sdk-base
 [download-image]: https://img.shields.io/npm/dm/sdk-base.svg?style=flat-square
@@ -34,7 +31,7 @@ $ npm install sdk-base
 
 Constructor argument:
 - {Object} options
-  - {String} [initMethod] - the async init method name, the method should be a generator function. If set, will execute the function in the constructor.
+  - {String} [initMethod] - the async init method name, the method should be a generator function or a function return promise. If set, will execute the function in the constructor.
 
   ```js
   'use strict';
@@ -52,6 +49,10 @@ Constructor argument:
     * init() {
       // put your async init logic here
     }
+    // support async function too
+    // async init() {
+    //   // put your async init logic here
+    // }
   }
 
   co(function* () {
@@ -117,7 +118,7 @@ Constructor argument:
   });
 
   // listen error event
-  client.on('error', function(err) {
+  client.on('error', err => {
     console.error(err.stack);
   });
   ```
