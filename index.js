@@ -12,12 +12,16 @@ class Base extends EventEmitter {
     super();
 
     if (options && options.initMethod) {
-      assert(is.generatorFunction(this[options.initMethod]),
-        `[sdk-base] this.${options.initMethod} should be a generator function.`);
+      assert(is.function(this[options.initMethod]),
+        `[sdk-base] this.${options.initMethod} should be a function.`);
 
       process.nextTick(() => {
-        co(this[options.initMethod].bind(this))
-          .then(() => this.ready(true))
+        if (is.generatorFunction(this[options.initMethod])) {
+          this[options.initMethod] = co.wrap(this[options.initMethod]);
+        }
+        const ret = this[options.initMethod]();
+        assert(is.promise(ret), `[sdk-base] this.${options.initMethod} should return either a promise or a generator`);
+        ret.then(() => this.ready(true))
           .catch(err => this.ready(err));
       });
     }
