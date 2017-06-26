@@ -1,4 +1,9 @@
 
+3.2.0 / 2017-06-26
+==================
+
+  * feat: let options.initMethod support functions that return promise (#9)
+
 3.1.1 / 2017-03-14
 ==================
 
