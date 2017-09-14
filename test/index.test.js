@@ -1,8 +1,8 @@
 'use strict';
 
-const Base = require('..');
 const assert = require('assert');
 const pedding = require('pedding');
+const Base = require('..');
 
 describe('sdk-base', () => {
   class SomeServiceClient extends Base {}
@@ -61,10 +61,16 @@ describe('sdk-base', () => {
   describe('ready', () => {
     it('should ready once', done => {
       const client = new SomeServiceClient();
-      client.ready(done);
+      assert(client.isReady === false);
+      client.ready(() => {
+        assert(client.isReady === true);
+        done();
+      });
       client.ready(true);
+      assert(client.isReady === true);
       // again should work
       client.ready(true);
+      assert(client.isReady === true);
     });
   });
 

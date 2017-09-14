@@ -89,6 +89,14 @@ class Base extends EventEmitter {
   }
 
   /**
+   * detect sdk start ready or not
+   * @return {Boolean} ready status
+   */
+  get isReady() {
+    return this._ready;
+  }
+
+  /**
    * set ready state or onready callback
    *
    * @param {Boolean|Error|Function} flagOrFunction - ready state or callback function
