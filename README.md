@@ -103,6 +103,7 @@ Constructor argument:
   yield client.ready();
   ```
 
+- `.isReady getter` detect client start ready or not.
 - `.on(event, listener)` wrap the [EventEmitter.prototype.on(event, listener)](https://nodejs.org/api/events.html#events_emitter_on_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
 - `once(event, listener)` wrap the [EventEmitter.prototype.once(event, listener)](https://nodejs.org/api/events.html#events_emitter_once_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
 - `prependListener(event, listener)` wrap the [EventEmitter.prototype.prependListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependlistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.

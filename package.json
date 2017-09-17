@@ -29,22 +29,22 @@
   },
   "license": "MIT",
   "dependencies": {
-    "await-event": "^2.0.0",
+    "await-event": "^2.1.0",
     "co": "^4.6.0",
-    "is-type-of": "^1.0.0"
+    "is-type-of": "^1.2.0"
   },
   "devDependencies": {
-    "autod": "^2.7.1",
-    "egg-bin": "^2.4.0",
-    "egg-ci": "^1.5.0",
-    "eslint": "^3.17.1",
-    "eslint-config-egg": "^3.2.0",
+    "autod": "^2.9.0",
+    "egg-bin": "^4.3.2",
+    "egg-ci": "^1.8.0",
+    "eslint": "^4.6.1",
+    "eslint-config-egg": "^5.1.1",
     "pedding": "^1.1.0"
   },
   "engine": {
     "node": ">= 6.0.0"
   },
   "ci": {
-    "version": "6, 7"
+    "version": "6, 8"
   }
 }
