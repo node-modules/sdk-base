@@ -1,4 +1,13 @@
 
+3.3.0 / 2017-09-17
+==================
+
+**features**
+  * [[`8d5c04a`](http://github.com/node-modules/sdk-base/commit/8d5c04aa3b0fee135dcf972b447aba0f79f56417)] - feat: add isReady getter (#10) (fengmk2 <<fengmk2@gmail.com>>)
+
+**others**
+  * [[`6ec435f`](http://github.com/node-modules/sdk-base/commit/6ec435f676395726ff64646518b55c7c8ff4bc45)] - chore: fix initMethod document description (fengmk2 <<fengmk2@gmail.com>>)
+
 3.2.0 / 2017-06-26
 ==================
 
