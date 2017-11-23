@@ -288,12 +288,26 @@ describe('sdk-base', () => {
     });
   });
 
-  describe('await', () => {
+  describe('await && awaitFirst', () => {
     it('should support client.await', function* () {
       const client = new SomeServiceClient();
       setTimeout(() => client.emit('someEvent', 'foo'), 100);
       const res = yield client.await('someEvent');
       assert(res === 'foo');
+    });
+
+    it('should support client.awaitFirst', function* () {
+      const client = new SomeServiceClient();
+      setTimeout(() => client.emit('foo', 'foo'), 200);
+      setTimeout(() => client.emit('bar', 'bar'), 100);
+
+      const o = yield client.awaitFirst([ 'foo', 'bar' ]);
+      assert.deepEqual(o, {
+        event: 'bar',
+        args: [ 'bar' ],
+      });
+      assert(client.listenerCount('foo') === 0);
+      assert(client.listenerCount('bar') === 0);
     });
   });
 });

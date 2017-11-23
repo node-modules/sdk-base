@@ -132,6 +132,20 @@ Constructor argument:
   });
   ```
 
+- `.awaitFirst(event)`: [await the first event in a set of event pairs](https://github.com/node-modules/await-first), return a promise, and it will clean up after itself.
+
+  ```js
+  co(function* () {
+    const o = yield client.awaitFirst([ 'foo', 'bar' ]);
+    if (o.event === 'foo') {
+      // ...
+    }
+    if (o.event === 'bar') {
+      // ...
+    }
+  });
+  ```
+
 ### License
 
 [MIT](LICENSE)
