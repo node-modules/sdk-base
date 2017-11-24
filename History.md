@@ -1,4 +1,10 @@
 
+3.4.0 / 2017-11-24
+==================
+
+**features**
+  * [[`98207ba`]](https://github.com/node-modules/sdk-base/pull/11/commits/98207ba521487df39f7c9b116aaf7163bb6b9ad8) - feat: add awaitFirst api (#11) (gxcsoccer <<gxcsoccer@126.com>>)
+
 3.3.0 / 2017-09-17
 ==================
 
