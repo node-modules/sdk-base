@@ -31,12 +31,11 @@ $ npm install sdk-base
 
 Constructor argument:
 - {Object} options
-  - {String} [initMethod] - the async init method name, the method should be a generator function or a function return promise. If set, will execute the function in the constructor.
+  - {String} [initMethod] - the async init method name, the method should be a async function or a function return promise. If set, will execute the function in the constructor.
 
   ```js
   'use strict';
 
-  const co = require('co');
   const Base = require('sdk-base');
 
   class Client extends Base {
@@ -46,7 +45,7 @@ Constructor argument:
       });
     }
 
-    * init() {
+    async init() {
       // put your async init logic here
     }
     // support async function too
@@ -55,23 +54,27 @@ Constructor argument:
     // }
   }
 
-  co(function* () {
+  const demo = async () => {
     const client = new Client();
     // wait client ready, if init failed, client will throw an error.
-    yield client.ready();
+    await client.ready();
 
-    // support generator event listener
-    client.on('data', function* (data) {
+    // support async event listener
+    client.on('data', async data => {
       // put your async process logic here
       //
       // @example
       // ----------
-      // yield submit(data);
+      // async submit(data);
     });
 
     client.emit('data', { foo: 'bar' });
+  };
 
-  }).catch(err => { console.error(err); });
+  demo().catch(err => {
+    console.error(err);
+  });
+
   ```
 
 ### API
@@ -99,16 +102,16 @@ Constructor argument:
     .then(() => { ... })
     .catch(err => { ... });
 
-  // support generator style call
-  yield client.ready();
+  // support async style call
+  await client.ready();
   ```
 
 - `.isReady getter` detect client start ready or not.
-- `.on(event, listener)` wrap the [EventEmitter.prototype.on(event, listener)](https://nodejs.org/api/events.html#events_emitter_on_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
-- `once(event, listener)` wrap the [EventEmitter.prototype.once(event, listener)](https://nodejs.org/api/events.html#events_emitter_once_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
-- `prependListener(event, listener)` wrap the [EventEmitter.prototype.prependListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependlistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
-- `prependOnceListener(event, listener)` wrap the [EventEmitter.prototype.prependOnceListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependoncelistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
-- `addListener(event, listener)` wrap the [EventEmitter.prototype.addListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_addlistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
+- `.on(event, listener)` wrap the [EventEmitter.prototype.on(event, listener)](https://nodejs.org/api/events.html#events_emitter_on_eventname_listener), the only difference is to support adding async listener on events, except 'error' event.
+- `once(event, listener)` wrap the [EventEmitter.prototype.once(event, listener)](https://nodejs.org/api/events.html#events_emitter_once_eventname_listener), the only difference is to support adding async listener on events, except 'error' event.
+- `prependListener(event, listener)` wrap the [EventEmitter.prototype.prependListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependlistener_eventname_listener), the only difference is to support adding async listener on events, except 'error' event.
+- `prependOnceListener(event, listener)` wrap the [EventEmitter.prototype.prependOnceListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependoncelistener_eventname_listener), the only difference is to support adding async listener on events, except 'error' event.
+- `addListener(event, listener)` wrap the [EventEmitter.prototype.addListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_addlistener_eventname_listener), the only difference is to support adding async listener on events, except 'error' event.
 
   ```js
   client.on('data', function* (data) {
@@ -127,23 +130,23 @@ Constructor argument:
 - `.await(event)`: [await an event](https://github.com/cojs/await-event), return a promise, and it will resolve(reject if event is `error`) once this event emmited.
 
   ```js
-  co(function* () {
-    const data = yield client.await('data');
-  });
+  async function() {
+    const data = await client.await('data');
+  };
   ```
 
 - `.awaitFirst(event)`: [await the first event in a set of event pairs](https://github.com/node-modules/await-first), return a promise, and it will clean up after itself.
 
   ```js
-  co(function* () {
-    const o = yield client.awaitFirst([ 'foo', 'bar' ]);
+  async function() {
+    const o = await client.awaitFirst([ 'foo', 'bar' ]);
     if (o.event === 'foo') {
       // ...
     }
     if (o.event === 'bar') {
       // ...
     }
-  });
+  };
   ```
 
 ### License
