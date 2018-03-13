@@ -2,6 +2,7 @@
 
 const assert = require('assert');
 const pedding = require('pedding');
+const sleep = require('mz-modules/sleep');
 const Base = require('..');
 
 describe('sdk-base', () => {
@@ -83,9 +84,9 @@ describe('sdk-base', () => {
         this.foo = 'foo';
       }
 
-      * init() {
+      async init() {
         assert(this.foo === 'foo');
-        yield cb => setTimeout(cb, 500);
+        await sleep(500);
         this.foo = 'bar';
       }
     }
@@ -105,14 +106,14 @@ describe('sdk-base', () => {
       }
     }
 
-    it('should auto init with options.initMethod', function* () {
+    it('should auto init with options.initMethod', async () => {
       const client = new Client({ a: 'a' });
       assert.deepEqual(client.options, {
         a: 'a',
         initMethod: 'init',
       });
-      yield client.ready();
-      yield client.ready();
+      await client.ready();
+      await client.ready();
       assert(client.foo === 'bar');
     });
 
@@ -124,14 +125,14 @@ describe('sdk-base', () => {
       });
     });
 
-    it('should support options.initMethod that return promise', function* () {
+    it('should support options.initMethod that return promise', async () => {
       const client = new Client2({ a: 'a' });
       assert.deepEqual(client.options, {
         a: 'a',
         initMethod: 'init',
       });
-      yield client.ready();
-      yield client.ready();
+      await client.ready();
+      await client.ready();
       assert(client.foo === 'bar');
     });
   });
@@ -144,18 +145,17 @@ describe('sdk-base', () => {
         });
       }
 
-      * init() {
-        yield cb => setTimeout(() => {
-          cb(new Error('init error'));
-        }, 500);
+      async init() {
+        await sleep(500);
+        throw new Error('init error');
       }
     }
 
-    it('should ready failed', function* () {
+    it('should ready failed', async () => {
       const client = new ErrorClient();
       let initError = null;
       try {
-        yield client.ready();
+        await client.ready();
       } catch (err) {
         initError = err;
       }
@@ -163,7 +163,7 @@ describe('sdk-base', () => {
 
       initError = null;
       try {
-        yield client.ready();
+        await client.ready();
       } catch (err) {
         initError = err;
       }
@@ -198,40 +198,40 @@ describe('sdk-base', () => {
     });
   });
 
-  describe('generator event listener', () => {
-    it('should add generator listener', done => {
+  describe('async event listener', () => {
+    it('should add async listener', done => {
       done = pedding(done, 8);
       const client = new SomeServiceClient();
 
-      client.addListener('event_code', function* (a, b) {
+      client.addListener('event_code', async (a, b) => {
         console.log('event_code in addListener');
         assert(a === 1);
         assert(b === 2);
         done();
       });
 
-      client.on('event_code', function* (a, b) {
+      client.on('event_code', async (a, b) => {
         console.log('event_code in on');
         assert(a === 1);
         assert(b === 2);
         done();
       });
 
-      client.once('event_code', function* (a, b) {
+      client.once('event_code', async (a, b) => {
         console.log('event_code in once');
         assert(a === 1);
         assert(b === 2);
         done();
       });
 
-      client.prependListener('event_code', function* (a, b) {
+      client.prependListener('event_code', async (a, b) => {
         console.log('event_code in prependListener');
         assert(a === 1);
         assert(b === 2);
         done();
       });
 
-      client.prependOnceListener('event_code', function* (a, b) {
+      client.prependOnceListener('event_code', async (a, b) => {
         console.log('event_code in prependOnceListener');
         assert(a === 1);
         assert(b === 2);
@@ -251,20 +251,20 @@ describe('sdk-base', () => {
         done();
       });
 
-      client.on('event_code', function* () {
+      client.on('event_code', async () => {
         throw new Error('generator process exception');
       });
 
-      client.once('event_code', function* () {
+      client.once('event_code', async () => {
         throw new Error('generator process exception');
       });
 
       client.emit('event_code');
     });
 
-    it('should remove generator listener', done => {
+    it('should remove async listener', done => {
       const client = new SomeServiceClient();
-      const handler = function* (data) {
+      const handler = async data => {
         assert(data === 1);
         done();
       };
@@ -281,7 +281,7 @@ describe('sdk-base', () => {
     it('should not allow to add generator listener on error event', () => {
       const client = new SomeServiceClient();
       assert.throws(() => {
-        client.on('error', function* (err) {
+        client.on('error', async err => {
           console.error(err);
         });
       }, '[sdk-base] `error` event should not have a generator listener.');
@@ -289,19 +289,19 @@ describe('sdk-base', () => {
   });
 
   describe('await && awaitFirst', () => {
-    it('should support client.await', function* () {
+    it('should support client.await', async () => {
       const client = new SomeServiceClient();
       setTimeout(() => client.emit('someEvent', 'foo'), 100);
-      const res = yield client.await('someEvent');
+      const res = await client.await('someEvent');
       assert(res === 'foo');
     });
 
-    it('should support client.awaitFirst', function* () {
+    it('should support client.awaitFirst', async () => {
       const client = new SomeServiceClient();
       setTimeout(() => client.emit('foo', 'foo'), 200);
       setTimeout(() => client.emit('bar', 'bar'), 100);
 
-      const o = yield client.awaitFirst([ 'foo', 'bar' ]);
+      const o = await client.awaitFirst([ 'foo', 'bar' ]);
       assert.deepEqual(o, {
         event: 'bar',
         args: [ 'bar' ],

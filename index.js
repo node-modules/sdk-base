@@ -1,6 +1,5 @@
 'use strict';
 
-const co = require('co');
 const util = require('util');
 const is = require('is-type-of');
 const assert = require('assert');
@@ -17,9 +16,6 @@ class Base extends EventEmitter {
         `[sdk-base] this.${options.initMethod} should be a function.`);
 
       process.nextTick(() => {
-        if (is.generatorFunction(this[options.initMethod])) {
-          this[options.initMethod] = co.wrap(this[options.initMethod]);
-        }
         const ret = this[options.initMethod]();
         assert(is.promise(ret), `[sdk-base] this.${options.initMethod} should return either a promise or a generator`);
         ret.then(() => this.ready(true))
@@ -39,16 +35,16 @@ class Base extends EventEmitter {
   }
 
   _wrapListener(eventName, listener) {
-    if (is.generatorFunction(listener)) {
-      assert(eventName !== 'error', '[sdk-base] `error` event should not have a generator listener.');
+    if (is.asyncFunction(listener)) {
+      assert(eventName !== 'error', '[sdk-base] `error` event should not have a async listener.');
 
-      const newListener = (...args) => {
-        co(function* () {
-          yield listener(...args);
-        }).catch(err => {
+      const newListener = async (...args) => {
+        try {
+          await listener(...args);
+        } catch (err) {
           err.name = 'EventListenerProcessError';
           this.emit('error', err);
-        });
+        }
       };
       newListener.original = listener;
       return newListener;
