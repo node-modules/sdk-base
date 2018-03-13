@@ -39,16 +39,16 @@ class Base extends EventEmitter {
   }
 
   _wrapListener(eventName, listener) {
-    if (is.generatorFunction(listener)) {
-      assert(eventName !== 'error', '[sdk-base] `error` event should not have a generator listener.');
+    if (is.asyncFunction(listener)) {
+      assert(eventName !== 'error', '[sdk-base] `error` event should not have a async listener.');
 
-      const newListener = (...args) => {
-        co(function* () {
-          yield listener(...args);
-        }).catch(err => {
+      const newListener = async (...args) => {
+        try {
+          await listener(...args);
+        } catch (err) {
           err.name = 'EventListenerProcessError';
           this.emit('error', err);
-        });
+        }
       };
       newListener.original = listener;
       return newListener;
