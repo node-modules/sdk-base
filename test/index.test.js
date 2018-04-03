@@ -242,6 +242,49 @@ describe('sdk-base', () => {
       client.emit('event_code', 1, 2);
     });
 
+    it('should add async listener', done => {
+      done = pedding(done, 8);
+      const client = new SomeServiceClient();
+
+      client.addListener('event_code_async', async function(a, b) {
+        console.log('event_code_async in addListener');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.on('event_code_async', async function(a, b) {
+        console.log('event_code_async in on');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.once('event_code_async', async function(a, b) {
+        console.log('event_code_async in once');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.prependListener('event_code_async', async function(a, b) {
+        console.log('event_code_async in prependListener');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.prependOnceListener('event_code_async', async function(a, b) {
+        console.log('event_code_async in prependOnceListener');
+        assert(a === 1);
+        assert(b === 2);
+        done();
+      });
+
+      client.emit('event_code_async', 1, 2);
+      client.emit('event_code_async', 1, 2);
+    });
+
     it('should catch generator exception and emit on error event', done => {
       done = pedding(done, 2);
       const client = new SomeServiceClient();
