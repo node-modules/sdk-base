@@ -1,0 +1,11 @@
+{
+  "sourceMaps": "inline",
+  "presets": ["es2015", "stage-1"],
+  "plugins": [
+    "transform-runtime",
+    ["transform-async-to-module-method", {
+      "module": "bluebird",
+      "method": "coroutine"
+    }]
+  ]
+}

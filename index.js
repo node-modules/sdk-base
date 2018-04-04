@@ -43,12 +43,15 @@ class Base extends EventEmitter {
       assert(eventName !== 'error', '[sdk-base] `error` event should not have a generator/async listener.');
 
       const newListener = (...args) => {
-        co(function* () {
-          const ret = yield listener(...args);
-          if (is.promise(ret)) {
-            yield ret;
-          }
-        }).catch(err => {
+        let promise;
+        if (is.asyncFunction(listener)) {
+          promise = listener(...args);
+        } else {
+          promise = co(function* () {
+            yield listener(...args);
+          });
+        }
+        promise.catch(err => {
           err.name = 'EventListenerProcessError';
           this.emit('error', err);
         });
