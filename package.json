@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "npm run lint && npm run test-local",
-    "test-local": "egg-bin test --require babel-register",
+    "test-local": "egg-bin test",
     "cov": "egg-bin cov",
     "ci": "npm run autod -- --check && npm run pkgfiles && npm run lint && npm run cov",
     "autod": "autod",
