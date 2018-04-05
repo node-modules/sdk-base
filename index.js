@@ -84,7 +84,7 @@ class Base extends EventEmitter {
 
   removeListener(eventName, listener) {
     let target = listener;
-    if (is.generatorFunction(listener)) {
+    if (is.generatorFunction(listener) || is.asyncFunction(listener)) {
       const listeners = this.listeners(eventName);
       for (const fn of listeners) {
         if (fn.original === listener) {

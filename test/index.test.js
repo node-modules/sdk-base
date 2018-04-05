@@ -321,6 +321,25 @@ describe('sdk-base', () => {
       assert(client.listeners('event_code').length === 0);
     });
 
+    it('should remove async listener', done => {
+      done = pedding(done, 1);
+      const client = new SomeServiceClient();
+      const handler = async function(data) {
+        assert(data === 1);
+        console.log('async listener');
+        done();
+      };
+      client.on('event_code', data => {
+        assert(data === 1);
+        console.log('normal listener');
+      });
+      client.on('event_code_async', handler);
+      client.emit('event_code', 1);
+      client.emit('event_code_async', 1);
+      client.removeListener('event_code_async', handler);
+      assert(client.listeners('event_code_async').length === 0);
+    });
+
     it('should not allow to add generator listener on error event', () => {
       const client = new SomeServiceClient();
       assert.throws(() => {
