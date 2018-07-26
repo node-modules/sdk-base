@@ -1,4 +1,13 @@
 
+3.5.0 / 2018-07-26
+==================
+
+**features**
+  * [[`dcce360`](http://github.com/node-modules/sdk-base/commit/dcce360d5da6a3f0516c2329c1902c49221ffd29)] - feat: add typescript definition file (#14) (Angela <<idu.angela@gmail.com>>)
+
+**others**
+  * [[`f975763`](http://github.com/node-modules/sdk-base/commit/f975763047a461fc8d0758f08dd52e16078f5bc9)] - chore: release 3.4.0 (xiaochen.gaoxc <<xiaochen.gaoxc@alibaba-inc.com>>),
+
 3.4.0 / 2017-11-24
 ==================
 
