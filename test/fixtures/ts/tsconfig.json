@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "baseUrl": ".",
+    "module": "commonjs",
+    "lib": [ "es7" ],
+    "esModuleInterop": true,
+    "strict": true
+  }
+}

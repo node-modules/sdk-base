@@ -3,6 +3,9 @@
 const assert = require('assert');
 const pedding = require('pedding');
 const Base = require('..');
+const path = require('path');
+const runscript = require('runscript');
+const baseDir = path.join(__dirname, './fixtures/ts');
 
 describe('sdk-base', () => {
   class SomeServiceClient extends Base {}
@@ -308,6 +311,15 @@ describe('sdk-base', () => {
       });
       assert(client.listenerCount('foo') === 0);
       assert(client.listenerCount('bar') === 0);
+    });
+  });
+
+  describe('run as typescript', () => {
+    it('compile ts file and execute', function* () {
+      yield runscript(`tsc -p ${baseDir}/tsconfig.json`, { cwd: baseDir });
+      const { test } = require('./fixtures/ts/index');
+      const result = yield test();
+      assert.strictEqual(result, true);
     });
   });
 });

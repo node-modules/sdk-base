@@ -14,3 +14,5 @@ node_modules
 
 dump.rdb
 .DS_Store
+
+test/fixtures/**/*.js
