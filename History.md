@@ -1,4 +1,10 @@
 
+3.5.1 / 2018-09-27
+==================
+
+**fixes**
+  * [[`de262c1`](http://github.com/node-modules/sdk-base/commit/de262c1e41e65a5fb11e95a95f96c6c561cb9d23)] - fix(ts): support es module export (#15) (Haoliang Gao <<sakura9515@gmail.com>>)
+
 3.5.0 / 2018-07-26
 ==================
 
