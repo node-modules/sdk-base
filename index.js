@@ -170,3 +170,5 @@ class Base extends EventEmitter {
 }
 
 module.exports = Base;
+// support es module
+module.exports.default = Base;
