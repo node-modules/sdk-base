@@ -287,7 +287,7 @@ describe('sdk-base', () => {
         client.on('error', function* (err) {
           console.error(err);
         });
-      }, '[sdk-base] `error` event should not have a generator listener.');
+      }, null, /\[sdk-base\] `error` event should not have a generator listener\./);
     });
   });
 

@@ -2,26 +2,36 @@
 
 const co = require('co');
 const util = require('util');
-const is = require('is-type-of');
 const assert = require('assert');
 const awaitEvent = require('await-event');
 const awaitFirst = require('await-first');
 const EventEmitter = require('events').EventEmitter;
+
+function isGeneratorFunction(obj) {
+  return obj &&
+    obj.constructor &&
+    obj.constructor.name === 'GeneratorFunction';
+}
+
+function isPromise(obj) {
+  return obj &&
+    typeof obj.then === 'function';
+}
 
 class Base extends EventEmitter {
   constructor(options) {
     super();
 
     if (options && options.initMethod) {
-      assert(is.function(this[options.initMethod]),
+      assert(typeof this[options.initMethod] === 'function',
         `[sdk-base] this.${options.initMethod} should be a function.`);
 
       process.nextTick(() => {
-        if (is.generatorFunction(this[options.initMethod])) {
+        if (isGeneratorFunction(this[options.initMethod])) {
           this[options.initMethod] = co.wrap(this[options.initMethod]);
         }
         const ret = this[options.initMethod]();
-        assert(is.promise(ret), `[sdk-base] this.${options.initMethod} should return either a promise or a generator`);
+        assert(isPromise(ret), `[sdk-base] this.${options.initMethod} should return either a promise or a generator`);
         ret.then(() => this.ready(true))
           .catch(err => this.ready(err));
       });
@@ -39,7 +49,7 @@ class Base extends EventEmitter {
   }
 
   _wrapListener(eventName, listener) {
-    if (is.generatorFunction(listener)) {
+    if (isGeneratorFunction(listener)) {
       assert(eventName !== 'error', '[sdk-base] `error` event should not have a generator listener.');
 
       const newListener = (...args) => {
@@ -78,7 +88,7 @@ class Base extends EventEmitter {
 
   removeListener(eventName, listener) {
     let target = listener;
-    if (is.generatorFunction(listener)) {
+    if (isGeneratorFunction(listener)) {
       const listeners = this.listeners(eventName);
       for (const fn of listeners) {
         if (fn.original === listener) {
@@ -122,7 +132,7 @@ class Base extends EventEmitter {
           }
         });
       });
-    } else if (is.function(flagOrFunction)) {
+    } else if (typeof flagOrFunction === 'function') {
       this._readyCallbacks.push(flagOrFunction);
     } else if (flagOrFunction instanceof Error) {
       this._ready = false;
