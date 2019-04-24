@@ -145,6 +145,10 @@ Constructor argument:
     }
   });
   ```
+  
+- `._close()`: The `_close()` method is called by `close`, It can be overridden by child class, but should not be called directly. It must return promise or generator.
+
+- `.close()`: The `close()` method is used to close the instance. 
 
 ### License
 

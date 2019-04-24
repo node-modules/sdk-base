@@ -287,7 +287,7 @@ describe('sdk-base', () => {
         client.on('error', function* (err) {
           console.error(err);
         });
-      }, '[sdk-base] `error` event should not have a generator listener.');
+      }, /\[sdk-base] `error` event should not have a generator listener./);
     });
   });
 
@@ -320,6 +320,115 @@ describe('sdk-base', () => {
       const { test } = require('./fixtures/ts/index');
       const result = yield test();
       assert.strictEqual(result, true);
+    });
+  });
+
+  describe('close', () => {
+    describe('generate close', () => {
+      class GenerateCloseClient extends Base {
+        * _close() {
+          yield cb => process.nextTick(() => {
+            cb();
+          });
+        }
+      }
+
+      it('should success', function* () {
+        const client = new GenerateCloseClient();
+        yield client.close();
+        assert(client._closed === true);
+      });
+    });
+
+    describe('promise close', () => {
+      class PromiseCloseClient extends Base {
+        _close() {
+          return new Promise(resolve => {
+            process.nextTick(() => {
+              resolve();
+            });
+          });
+        }
+      }
+
+      it('should success', function* () {
+        const client = new PromiseCloseClient();
+        yield client.close();
+        assert(client._closed === true);
+      });
+    });
+
+    describe('no _close', () => {
+      class NoCloseClient extends Base {
+      }
+
+      it('should success', function* () {
+        const client = new NoCloseClient();
+        yield client.close();
+        assert(client._closed === true);
+      });
+    });
+
+    describe('duplicate close', () => {
+      let calledTimes = 0;
+      afterEach(() => {
+        calledTimes = 0;
+      });
+
+      class PromiseCloseClient extends Base {
+        _close() {
+          calledTimes++;
+          return new Promise(resolve => {
+            process.nextTick(() => {
+              resolve();
+            });
+          });
+        }
+      }
+
+      describe('serial close', () => {
+        it('should success', function* () {
+          const client = new PromiseCloseClient();
+          yield client.close();
+          yield client.close();
+          assert(client._closed === true);
+          assert(calledTimes === 1);
+        });
+      });
+
+      describe('parallel close', () => {
+        it('should success', function* () {
+          const client = new PromiseCloseClient();
+          yield [
+            client.close(),
+            client.close(),
+          ];
+          assert(client._closed === true);
+          assert(calledTimes === 1);
+        });
+      });
+    });
+
+    describe('error close', () => {
+      class ErrorCloseClient extends Base {
+        _close() {
+          return new Promise((resolve, reject) => {
+            reject(new Error('mock error'));
+          });
+        }
+      }
+
+      it('should success', function* () {
+        const client = new ErrorCloseClient();
+        let error;
+        client.on('error', e => {
+          error = e;
+        });
+        yield client.close();
+        assert(client._closed === true);
+        assert(error);
+        assert(/mock error/.test(error.message));
+      });
     });
   });
 });
