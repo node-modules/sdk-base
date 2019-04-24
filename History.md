@@ -1,4 +1,10 @@
 
+3.6.0 / 2019-04-24
+==================
+
+**features**
+  * [[`39c0f1d`](http://github.com/node-modules/sdk-base/commit/39c0f1d946bd7da1e393d42cca2f5e1bc22eb785)] - feat: implement close function (#17) (killa <<killa123@126.com>>)
+
 3.5.1 / 2018-09-27
 ==================
 
