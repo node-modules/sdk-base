@@ -137,7 +137,7 @@ class Base extends EventEmitter {
     }
 
     if (this._ready || this._readyError) {
-      this._readyCallbacks.splice(0, Infinity).forEach(callback => {
+      this._readyCallbacks.splice(0, this._readyCallbacks.length).forEach(callback => {
         process.nextTick(() => {
           callback(this._readyError);
         });
