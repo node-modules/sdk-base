@@ -190,11 +190,11 @@ class Base extends EventEmitter {
       return Promise.resolve();
     }
     let closeFunc = this._close;
-    if (is.generatorFunction(closeFunc)) {
+    if (isGeneratorFunction(closeFunc)) {
       closeFunc = co.wrap(closeFunc);
     }
     this[CLOSE_PROMISE] = closeFunc.apply(this);
-    assert(is.promise(this[CLOSE_PROMISE]), '[sdk-base] this._close should return either a promise or a generator');
+    assert(isPromise(this[CLOSE_PROMISE]), '[sdk-base] this._close should return either a promise or a generator');
     return this[CLOSE_PROMISE]
       .then(() => {
         this._closed = true;
