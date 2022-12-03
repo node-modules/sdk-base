@@ -174,6 +174,21 @@ describe('test/index.test.js', () => {
       }
     }
 
+    class Client3 extends Base {
+      constructor(options) {
+        super(Object.assign({
+          initMethod: 'init',
+        }, options));
+        this.foo = 'foo';
+      }
+
+      async init() {
+        assert(this.foo === 'foo');
+        await sleep(500);
+        this.ready(new Error('mock ready error'));
+      }
+    }
+
     it('should auto init with options.initMethod', async () => {
       const client = new Client({ a: 'a' });
       assert.deepEqual(client.options, {
@@ -193,7 +208,7 @@ describe('test/index.test.js', () => {
       });
     });
 
-    it('should throw error', async () => {
+    it('should throw init error', async () => {
       const client = new Client2({ a: 'a' });
       assert.deepEqual(client.options, {
         a: 'a',
@@ -203,6 +218,20 @@ describe('test/index.test.js', () => {
         await client.ready();
       }, err => {
         assert(err.message === 'mock init error');
+        return true;
+      });
+    });
+
+    it('should throw ready error', async () => {
+      const client = new Client3({ a: 'a' });
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
+      await assert.rejects(async () => {
+        await client.ready();
+      }, err => {
+        assert(err.message === 'mock ready error');
         return true;
       });
     });
@@ -423,6 +452,22 @@ describe('test/index.test.js', () => {
       it('should success', function* () {
         const client = new PromiseCloseClient();
         yield client.close();
+        assert(client._closed === true);
+      });
+    });
+
+    describe('async function _close', () => {
+      class PromiseCloseClient extends Base {
+        async _close() {
+          await sleep(10);
+        }
+      }
+
+      it('should success', async () => {
+        const client = new PromiseCloseClient();
+        await client.close();
+        assert(client._closed === true);
+        await client.close();
         assert(client._closed === true);
       });
     });

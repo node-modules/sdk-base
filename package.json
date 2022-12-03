@@ -6,8 +6,8 @@
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "npm run lint && npm run test-local",
-    "test-local": "egg-bin test",
-    "cov": "egg-bin cov",
+    "test-local": "egg-bin test -r co-mocha",
+    "cov": "egg-bin cov -r co-mocha",
     "ci": "npm run lint && npm run cov"
   },
   "keywords": [
@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@types/node": "^14.18.34",
+    "co-mocha": "^1.2.2",
     "egg-bin": "^5.5.0",
     "egg-ci": "^2.2.0",
     "eslint": "^8.29.0",
