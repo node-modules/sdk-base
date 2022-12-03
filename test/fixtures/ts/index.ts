@@ -1,5 +1,3 @@
-'use strict';
-
 import Base, { BaseOptions } from '../../..';
 
 class Client extends Base {
@@ -33,7 +31,7 @@ class Client extends Base {
   }
 }
 
-export function* test() {
+export async function test() {
 
   let client;
   
@@ -41,8 +39,8 @@ export function* test() {
   client.ready(() => {
     console.log('ready');
   });
-  yield client.await('someEvent');
-  yield client.awaitFirst([ 'one', 'two' ]);
+  await client.await('someEvent');
+  await client.awaitFirst([ 'one', 'two' ]);
 
   return client.isReady;
 

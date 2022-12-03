@@ -1,11 +1,9 @@
-'use strict';
-
 const co = require('co');
 const util = require('util');
 const assert = require('assert');
 const awaitEvent = require('await-event');
 const awaitFirst = require('await-first');
-const EventEmitter = require('events').EventEmitter;
+const { EventEmitter } = require('events');
 const CLOSE_PROMISE = Symbol('base#closePromise');
 
 function isGeneratorFunction(obj) {
