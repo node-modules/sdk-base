@@ -29,4 +29,5 @@ export default class Base extends EventEmitter {
     ready(err: Error): void;
     ready(ready: boolean): void;
     ready(readyCallback: Function): void;
+    readyOrTimeout(milliseconds: number): Promise<void>;
 }

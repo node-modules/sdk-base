@@ -32,7 +32,8 @@
   "dependencies": {
     "await-event": "^2.1.0",
     "await-first": "^1.0.0",
-    "co": "^4.6.0"
+    "co": "^4.6.0",
+    "p-timeout": "^4.1.0"
   },
   "devDependencies": {
     "@types/node": "^14.18.34",
