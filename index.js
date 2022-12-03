@@ -6,6 +6,7 @@ const assert = require('assert');
 const awaitEvent = require('await-event');
 const awaitFirst = require('await-first');
 const EventEmitter = require('events').EventEmitter;
+const CLOSE_PROMISE = Symbol('base#closePromise');
 
 function isGeneratorFunction(obj) {
   return obj &&
@@ -40,6 +41,7 @@ class Base extends EventEmitter {
     this._ready = false;
     this._readyError = null;
     this._readyCallbacks = [];
+    this._closed = false;
 
     // support `yield this.await('event')`
     this.await = awaitEvent;
@@ -145,7 +147,7 @@ class Base extends EventEmitter {
     }
 
     if (this._ready || this._readyError) {
-      this._readyCallbacks.splice(0, Infinity).forEach(callback => {
+      this._readyCallbacks.splice(0, this._readyCallbacks.length).forEach(callback => {
         process.nextTick(() => {
           callback(this._readyError);
         });
@@ -176,6 +178,33 @@ class Base extends EventEmitter {
       console.error('Error Additions:\n%s', additions.join('\n'));
     }
     console.error();
+  }
+
+  close() {
+    if (this._closed) {
+      return Promise.resolve();
+    }
+    if (this[CLOSE_PROMISE]) {
+      return this[CLOSE_PROMISE];
+    }
+    if (!this._close) {
+      this._closed = true;
+      return Promise.resolve();
+    }
+    let closeFunc = this._close;
+    if (is.generatorFunction(closeFunc)) {
+      closeFunc = co.wrap(closeFunc);
+    }
+    this[CLOSE_PROMISE] = closeFunc.apply(this);
+    assert(is.promise(this[CLOSE_PROMISE]), '[sdk-base] this._close should return either a promise or a generator');
+    return this[CLOSE_PROMISE]
+      .then(() => {
+        this._closed = true;
+      })
+      .catch(err => {
+        this._closed = true;
+        this.emit('error', err);
+      });
   }
 }
 
