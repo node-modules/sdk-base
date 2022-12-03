@@ -1,4 +1,10 @@
 
+4.1.0 / 2022-12-03
+==================
+
+**features**
+  * [[`6e8a1c4`](http://github.com/node-modules/sdk-base/commit/6e8a1c4707908b28cc30a6019f164544c9033bb7)] - 📦 NEW: Support ready or timeout detect (#20) (fengmk2 <<fengmk2@gmail.com>>)
+
 4.0.0 / 2022-12-03
 ==================
 
