@@ -2,19 +2,14 @@ sdk-base
 ---------------
 
 [![NPM version][npm-image]][npm-url]
-[![build status][travis-image]][travis-url]
+[![Node.js CI](https://github.com/node-modules/sdk-base/actions/workflows/nodejs.yml/badge.svg)](https://github.com/node-modules/sdk-base/actions/workflows/nodejs.yml)
 [![Test coverage][coveralls-image]][coveralls-url]
-[![David deps][david-image]][david-url]
 [![npm download][download-image]][download-url]
 
 [npm-image]: https://img.shields.io/npm/v/sdk-base.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/sdk-base
-[travis-image]: https://img.shields.io/travis/node-modules/sdk-base.svg?style=flat-square
-[travis-url]: https://travis-ci.org/node-modules/sdk-base
 [coveralls-image]: https://img.shields.io/coveralls/node-modules/sdk-base.svg?style=flat-square
 [coveralls-url]: https://coveralls.io/r/node-modules/sdk-base?branch=master
-[david-image]: https://img.shields.io/david/node-modules/sdk-base.svg?style=flat-square
-[david-url]: https://david-dm.org/node-modules/sdk-base
 [download-image]: https://img.shields.io/npm/dm/sdk-base.svg?style=flat-square
 [download-url]: https://npmjs.org/package/sdk-base
 
@@ -31,12 +26,9 @@ $ npm install sdk-base
 
 Constructor argument:
 - {Object} options
-  - {String} [initMethod] - the async init method name, the method should be a generator function or a function return promise. If set, will execute the function in the constructor.
+  - {String} [initMethod] - the async init method name, the method should be a function return promise. If set, will execute the function in the constructor.
 
   ```js
-  'use strict';
-
-  const co = require('co');
   const Base = require('sdk-base');
 
   class Client extends Base {
@@ -46,7 +38,7 @@ Constructor argument:
       });
     }
 
-    * init() {
+    async init() {
       // put your async init logic here
     }
     // support async function too
@@ -55,23 +47,23 @@ Constructor argument:
     // }
   }
 
-  co(function* () {
+  (async function main() {
     const client = new Client();
     // wait client ready, if init failed, client will throw an error.
-    yield client.ready();
+    await client.ready();
 
-    // support generator event listener
-    client.on('data', function* (data) {
+    // support async event listener
+    client.on('data', async function (data) {
       // put your async process logic here
       //
       // @example
       // ----------
-      // yield submit(data);
+      // await submit(data);
     });
 
     client.emit('data', { foo: 'bar' });
 
-  }).catch(err => { console.error(err); });
+  })().catch(err => { console.error(err); });
   ```
 
 ### API
@@ -100,21 +92,21 @@ Constructor argument:
     .catch(err => { ... });
 
   // support generator style call
-  yield client.ready();
+  await client.ready();
   ```
 
 - `.isReady getter` detect client start ready or not.
-- `.on(event, listener)` wrap the [EventEmitter.prototype.on(event, listener)](https://nodejs.org/api/events.html#events_emitter_on_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
-- `once(event, listener)` wrap the [EventEmitter.prototype.once(event, listener)](https://nodejs.org/api/events.html#events_emitter_once_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
-- `prependListener(event, listener)` wrap the [EventEmitter.prototype.prependListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependlistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
+- `.on(event, listener)` wrap the [EventEmitter.prototype.on(event, listener)](https://nodejs.org/api/events.html#events_emitter_on_eventname_listener), the only difference is to support adding async function listener on events, except 'error' event.
+- `once(event, listener)` wrap the [EventEmitter.prototype.once(event, listener)](https://nodejs.org/api/events.html#events_emitter_once_eventname_listener), the only difference is to support adding async function listener on events, except 'error' event.
+- `prependListener(event, listener)` wrap the [EventEmitter.prototype.prependListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependlistener_eventname_listener), the only difference is to support adding async function listener on events, except 'error' event.
 - `prependOnceListener(event, listener)` wrap the [EventEmitter.prototype.prependOnceListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_prependoncelistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
-- `addListener(event, listener)` wrap the [EventEmitter.prototype.addListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_addlistener_eventname_listener), the only difference is to support adding generator listener on events, except 'error' event.
+- `addListener(event, listener)` wrap the [EventEmitter.prototype.addListener(event, listener)](https://nodejs.org/api/events.html#events_emitter_addlistener_eventname_listener), the only difference is to support adding async function listener on events, except 'error' event.
 
   ```js
-  client.on('data', function* (data) {
+  client.on('data', async function(data) {
     // your async process logic here
   });
-  client.once('foo', function* (bar) {
+  client.once('foo', async function(bar) {
     // ...
   });
 
@@ -127,23 +119,21 @@ Constructor argument:
 - `.await(event)`: [await an event](https://github.com/cojs/await-event), return a promise, and it will resolve(reject if event is `error`) once this event emmited.
 
   ```js
-  co(function* () {
-    const data = yield client.await('data');
-  });
+  const data = await client.await('data');
   ```
 
 - `.awaitFirst(event)`: [await the first event in a set of event pairs](https://github.com/node-modules/await-first), return a promise, and it will clean up after itself.
 
   ```js
-  co(function* () {
-    const o = yield client.awaitFirst([ 'foo', 'bar' ]);
+  (async function main() {
+    const o = await client.awaitFirst([ 'foo', 'bar' ]);
     if (o.event === 'foo') {
       // ...
     }
     if (o.event === 'bar') {
       // ...
     }
-  });
+  })();
   ```
   
 - `._close()`: The `_close()` method is called by `close`, It can be overridden by child class, but should not be called directly. It must return promise or generator.
@@ -153,3 +143,15 @@ Constructor argument:
 ### License
 
 [MIT](LICENSE)
+
+<!-- GITCONTRIBUTOR_START -->
+
+## Contributors
+
+|[<img src="https://avatars.githubusercontent.com/u/985607?v=4" width="100px;"/><br/><sub><b>dead-horse</b></sub>](https://github.com/dead-horse)<br/>|[<img src="https://avatars.githubusercontent.com/u/156269?v=4" width="100px;"/><br/><sub><b>fengmk2</b></sub>](https://github.com/fengmk2)<br/>|[<img src="https://avatars.githubusercontent.com/u/1207064?v=4" width="100px;"/><br/><sub><b>gxcsoccer</b></sub>](https://github.com/gxcsoccer)<br/>|[<img src="https://avatars.githubusercontent.com/u/360661?v=4" width="100px;"/><br/><sub><b>popomore</b></sub>](https://github.com/popomore)<br/>|[<img src="https://avatars.githubusercontent.com/u/2039144?v=4" width="100px;"/><br/><sub><b>sang4lv</b></sub>](https://github.com/sang4lv)<br/>|[<img src="https://avatars.githubusercontent.com/u/1474688?v=4" width="100px;"/><br/><sub><b>luckydrq</b></sub>](https://github.com/luckydrq)<br/>|
+| :---: | :---: | :---: | :---: | :---: | :---: |
+[<img src="https://avatars.githubusercontent.com/u/12656301?v=4" width="100px;"/><br/><sub><b>brizer</b></sub>](https://github.com/brizer)<br/>|[<img src="https://avatars.githubusercontent.com/u/6897780?v=4" width="100px;"/><br/><sub><b>killagu</b></sub>](https://github.com/killagu)<br/>
+
+This project follows the git-contributor [spec](https://github.com/xudafeng/git-contributor), auto updated at `Sat Dec 03 2022 16:27:57 GMT+0800`.
+
+<!-- GITCONTRIBUTOR_END -->

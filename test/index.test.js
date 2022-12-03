@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const pedding = require('pedding');
 const Base = require('..');
@@ -7,7 +5,13 @@ const path = require('path');
 const runscript = require('runscript');
 const baseDir = path.join(__dirname, './fixtures/ts');
 
-describe('sdk-base', () => {
+function sleep(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
+
+describe('test/index.test.js', () => {
   class SomeServiceClient extends Base {}
 
   describe('default error handler', () => {
@@ -77,7 +81,7 @@ describe('sdk-base', () => {
     });
   });
 
-  describe('options.initMethod', () => {
+  describe('options.initMethod support generator', () => {
     class Client extends Base {
       constructor(options) {
         super(Object.assign({
@@ -136,6 +140,100 @@ describe('sdk-base', () => {
       yield client.ready();
       yield client.ready();
       assert(client.foo === 'bar');
+    });
+  });
+
+  describe('options.initMethod support async function', () => {
+    class Client extends Base {
+      constructor(options) {
+        super(Object.assign({
+          initMethod: 'init',
+        }, options));
+        this.foo = 'foo';
+      }
+
+      async init() {
+        assert(this.foo === 'foo');
+        await sleep(500);
+        this.foo = 'bar';
+      }
+    }
+
+    class Client2 extends Base {
+      constructor(options) {
+        super(Object.assign({
+          initMethod: 'init',
+        }, options));
+        this.foo = 'foo';
+      }
+
+      async init() {
+        assert(this.foo === 'foo');
+        await sleep(500);
+        throw new Error('mock init error');
+      }
+    }
+
+    class Client3 extends Base {
+      constructor(options) {
+        super(Object.assign({
+          initMethod: 'init',
+        }, options));
+        this.foo = 'foo';
+      }
+
+      async init() {
+        assert(this.foo === 'foo');
+        await sleep(500);
+        this.ready(new Error('mock ready error'));
+      }
+    }
+
+    it('should auto init with options.initMethod', async () => {
+      const client = new Client({ a: 'a' });
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
+      await client.ready();
+      await client.ready();
+      assert(client.foo === 'bar');
+    });
+
+    it('should trigger ready callback without err', done => {
+      const client = new Client();
+      client.ready(err => {
+        assert.ifError(err);
+        done();
+      });
+    });
+
+    it('should throw init error', async () => {
+      const client = new Client2({ a: 'a' });
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
+      await assert.rejects(async () => {
+        await client.ready();
+      }, err => {
+        assert(err.message === 'mock init error');
+        return true;
+      });
+    });
+
+    it('should throw ready error', async () => {
+      const client = new Client3({ a: 'a' });
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
+      await assert.rejects(async () => {
+        await client.ready();
+      }, err => {
+        assert(err.message === 'mock ready error');
+        return true;
+      });
     });
   });
 
@@ -315,10 +413,10 @@ describe('sdk-base', () => {
   });
 
   describe('run as typescript', () => {
-    it('compile ts file and execute', function* () {
-      yield runscript(`tsc -p ${baseDir}/tsconfig.json`, { cwd: baseDir });
+    it('compile ts file and execute', async () => {
+      await runscript(`tsc -p ${baseDir}/tsconfig.json`, { cwd: baseDir });
       const { test } = require('./fixtures/ts/index');
-      const result = yield test();
+      const result = await test();
       assert.strictEqual(result, true);
     });
   });
@@ -354,6 +452,22 @@ describe('sdk-base', () => {
       it('should success', function* () {
         const client = new PromiseCloseClient();
         yield client.close();
+        assert(client._closed === true);
+      });
+    });
+
+    describe('async function _close', () => {
+      class PromiseCloseClient extends Base {
+        async _close() {
+          await sleep(10);
+        }
+      }
+
+      it('should success', async () => {
+        const client = new PromiseCloseClient();
+        await client.close();
+        assert(client._closed === true);
+        await client.close();
         assert(client._closed === true);
       });
     });
