@@ -4,6 +4,7 @@ const assert = require('assert');
 const awaitEvent = require('await-event');
 const awaitFirst = require('await-first');
 const { EventEmitter } = require('events');
+const pTimeout = require('p-timeout');
 const CLOSE_PROMISE = Symbol('base#closePromise');
 
 function isGeneratorFunction(obj) {
@@ -41,7 +42,7 @@ class Base extends EventEmitter {
     this._readyCallbacks = [];
     this._closed = false;
 
-    // support `yield this.await('event')`
+    // support `await this.await('event')`
     this.await = awaitEvent;
     this.awaitFirst = awaitFirst;
 
@@ -117,7 +118,7 @@ class Base extends EventEmitter {
   ready(flagOrFunction) {
     if (arguments.length === 0) {
       // return a promise
-      // support `this.ready().then(onready);` and `yield this.ready()`;
+      // support `this.ready().then(onready);` and `await this.ready()`;
       return new Promise((resolve, reject) => {
         if (this._ready) {
           return resolve();
@@ -150,6 +151,37 @@ class Base extends EventEmitter {
           callback(this._readyError);
         });
       });
+    }
+  }
+
+  async readyOrTimeout(milliseconds) {
+    if (this._ready) {
+      return;
+    } else if (this._readyError) {
+      throw this._readyError;
+    }
+    let readyWithTimeoutCallback;
+    const waitForReady = new Promise((resolve, reject) => {
+      readyWithTimeoutCallback = err => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      };
+      this._readyCallbacks.push(readyWithTimeoutCallback);
+    });
+    try {
+      await pTimeout(waitForReady, milliseconds);
+    } catch (err) {
+      for (const [ index, callback ] of this._readyCallbacks.entries()) {
+        if (callback === readyWithTimeoutCallback) {
+          // remove timeout readyCallback
+          this._readyCallbacks.splice(index, 1);
+          break;
+        }
+      }
+      throw err;
     }
   }
 

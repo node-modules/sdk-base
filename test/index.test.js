@@ -185,7 +185,7 @@ describe('test/index.test.js', () => {
       async init() {
         assert(this.foo === 'foo');
         await sleep(500);
-        this.ready(new Error('mock ready error'));
+        throw new Error('mock ready error');
       }
     }
 
@@ -230,6 +230,105 @@ describe('test/index.test.js', () => {
       });
       await assert.rejects(async () => {
         await client.ready();
+      }, err => {
+        assert(err.message === 'mock ready error');
+        return true;
+      });
+
+      await assert.rejects(async () => {
+        await client.readyOrTimeout(10);
+      }, err => {
+        assert(err.message === 'mock ready error');
+        return true;
+      });
+    });
+  });
+
+  describe('readyOrTimeout()', () => {
+    class Client extends Base {
+      constructor(options) {
+        super(Object.assign({
+          initMethod: 'init',
+        }, options));
+        this.foo = 'foo';
+      }
+
+      async init() {
+        assert(this.foo === 'foo');
+        await sleep(500);
+        this.foo = 'bar';
+      }
+    }
+
+    class Client2 extends Base {
+      constructor(options) {
+        super(Object.assign({
+          initMethod: 'init',
+        }, options));
+        this.foo = 'foo';
+      }
+
+      async init() {
+        assert(this.foo === 'foo');
+        await sleep(500);
+        throw new Error('mock ready error');
+      }
+    }
+
+    it('should ready timeout', async () => {
+      const client = new Client({ a: 'a' });
+      await sleep(1);
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
+      await assert.rejects(async () => {
+        await client.readyOrTimeout(10);
+      }, err => {
+        assert(err.name === 'TimeoutError');
+        // console.log('%o', client._readyCallbacks);
+        // console.log(client._readyCallbacks[0].toString());
+        assert(client._readyCallbacks.length === 0);
+        return true;
+      });
+
+      let readySuccess = false;
+      client.ready(function readySuccessCallback() {
+        readySuccess = true;
+      });
+      await assert.rejects(async () => {
+        await client.readyOrTimeout(10);
+      }, err => {
+        assert(err.name === 'TimeoutError');
+        console.log('%o', client._readyCallbacks);
+        // console.log(client._readyCallbacks[0].toString());
+        assert(client._readyCallbacks.length === 1);
+        assert(client._readyCallbacks[0].name === 'readySuccessCallback');
+        return true;
+      });
+      await client.ready();
+      assert(readySuccess);
+
+      await client.readyOrTimeout(1);
+    });
+
+    it('should ready success', async () => {
+      const client = new Client({ a: 'a' });
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
+      await client.readyOrTimeout(510);
+    });
+
+    it('should ready error', async () => {
+      const client = new Client2({ a: 'a' });
+      assert.deepEqual(client.options, {
+        a: 'a',
+        initMethod: 'init',
+      });
+      await assert.rejects(async () => {
+        await client.readyOrTimeout(510);
       }, err => {
         assert(err.message === 'mock ready error');
         return true;

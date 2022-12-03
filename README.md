@@ -91,8 +91,14 @@ Constructor argument:
     .then(() => { ... })
     .catch(err => { ... });
 
-  // support generator style call
+  // support async function style call
   await client.ready();
+  ```
+
+- `async readyOrTimeout(milliseconds)` ready or timeout, after milliseconds not ready will throw TimeoutError
+
+  ```js
+  await client.readyOrTimeout(100);
   ```
 
 - `.isReady getter` detect client start ready or not.
