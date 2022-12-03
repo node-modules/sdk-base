@@ -1,4 +1,15 @@
 
+4.0.0 / 2022-12-03
+==================
+
+**features**
+  * [[`567a380`](http://github.com/node-modules/sdk-base/commit/567a3806e348549f40fedf3438054b53f540107e)] - 👌 IMPROVE: [BREAKING] Drop Node.js < 14 support (#19) (fengmk2 <<fengmk2@gmail.com>>)
+  * [[`07d55e8`](http://github.com/node-modules/sdk-base/commit/07d55e8596ced9ecaea837a3ff8a56e87a333da8)] - feat: optimize performance (#18) (brizer <<362512489@qq.com>>)
+
+**others**
+  * [[`e9bf6e9`](http://github.com/node-modules/sdk-base/commit/e9bf6e9e66570ac7c5e9537c22855573275d6618)] - refactor: enhance require profermance (#16) (zōng yǔ <<gxcsoccer@users.noreply.github.com>>)
+  * [[`bbea174`](http://github.com/node-modules/sdk-base/commit/bbea174cebde7af79afdff50cd01eec3b5481fad)] - Create codeql.yml (fengmk2 <<fengmk2@gmail.com>>)
+
 3.6.0 / 2019-04-24
 ==================
 

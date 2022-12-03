@@ -1,6 +1,6 @@
 {
   "name": "sdk-base",
-  "version": "3.6.0",
+  "version": "4.0.0",
   "description": "a base class for sdk with default error handler",
   "main": "index.js",
   "scripts": {
