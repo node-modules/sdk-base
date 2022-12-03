@@ -3,8 +3,13 @@
     "target": "es6",
     "baseUrl": ".",
     "module": "commonjs",
-    "lib": [ "es7" ],
+    "lib": ["es7"],
     "esModuleInterop": false,
-    "strict": true
-  }
+    "strict": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }
