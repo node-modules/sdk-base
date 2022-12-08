@@ -1,33 +1,29 @@
-// Type definitions for sdk-base 3.4
-// Project: https://github.com/node-modules/sdk-base
-// Definitions by: Sang Lv <https://github.com/sang4lv>
-// TypeScript Version: 2.9.2
-
 /* =================== USAGE ===================
-    import Base from "sdk-base";
-    class newSDK extends Base {}
- =============================================== */
-
-/// <reference types="node" />
+  import Base from "sdk-base";
+  class newSDK extends Base<FooContext> {}
+=============================================== */
 
 import { EventEmitter } from 'events';
+import { AsyncLocalStorage } from 'async_hooks';
 
-interface BaseOptions {
-    initMethod?: string;
-    [key: string]: any;
+interface BaseOptions<TContext> {
+  initMethod?: string;
+  // any Context, e.g.: koa/egg Context
+  localStorage?: AsyncLocalStorage<TContext>;
+  [key: string]: any;
 }
 
-export default class Base extends EventEmitter {
-    constructor(option?: BaseOptions);
+export default class Base<TContext> extends EventEmitter {
+  constructor(option?: BaseOptions<TContext>);
 
-    isReady: boolean;
-    options: BaseOptions;
-    await(...args: any[]): Promise<any>;
-    awaitFirst(...args: any[]): Promise<any>;
-    
-    ready(): Promise<any>;
-    ready(err: Error): void;
-    ready(ready: boolean): void;
-    ready(readyCallback: Function): void;
-    readyOrTimeout(milliseconds: number): Promise<void>;
+  isReady: boolean;
+  options: BaseOptions<TContext>;
+  localStorage?: AsyncLocalStorage<TContext>;
+  await(...args: any[]): Promise<any>;
+  awaitFirst(...args: any[]): Promise<any>;
+  ready(): Promise<any>;
+  ready(err: Error): void;
+  ready(ready: boolean): void;
+  ready(readyCallback: Function): void;
+  readyOrTimeout(milliseconds: number): Promise<void>;
 }

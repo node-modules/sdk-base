@@ -110,6 +110,14 @@ class Base extends EventEmitter {
   }
 
   /**
+   * get AsyncLocalStorage from options
+   * @return {AsyncLocalStorage} asyncLocalStorage instance or undefined
+   */
+  get localStorage() {
+    return this.options.localStorage;
+  }
+
+  /**
    * set ready state or onready callback
    *
    * @param {Boolean|Error|Function} flagOrFunction - ready state or callback function

@@ -27,6 +27,7 @@ $ npm install sdk-base
 Constructor argument:
 - {Object} options
   - {String} [initMethod] - the async init method name, the method should be a function return promise. If set, will execute the function in the constructor.
+  - {AsyncLocalStorage} [localStorage] - async localStorage instance.
 
   ```js
   const Base = require('sdk-base');
@@ -35,6 +36,7 @@ Constructor argument:
     constructor() {
       super({
         initMethod: 'init',
+        localStorage: app.ctxStorage,
       });
     }
 
