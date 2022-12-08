@@ -6,18 +6,17 @@
 import { EventEmitter } from 'events';
 import { AsyncLocalStorage } from 'async_hooks';
 
-interface BaseOptions<TContext> {
+export interface BaseOptions {
   initMethod?: string;
-  // any Context, e.g.: koa/egg Context
-  localStorage?: AsyncLocalStorage<TContext>;
+  localStorage?: any;
   [key: string]: any;
 }
 
 export default class Base<TContext> extends EventEmitter {
-  constructor(option?: BaseOptions<TContext>);
+  constructor(option?: BaseOptions);
 
   isReady: boolean;
-  options: BaseOptions<TContext>;
+  options: BaseOptions;
   localStorage?: AsyncLocalStorage<TContext>;
   await(...args: any[]): Promise<any>;
   awaitFirst(...args: any[]): Promise<any>;

@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --ext .js .",
     "tsd": "tsd",
-    "test": "npm run lint && npm run test-local",
+    "test": "npm run lint && npm run tsd && npm run test-local",
     "test-local": "egg-bin test -r co-mocha",
     "cov": "egg-bin cov -r co-mocha",
     "ci": "npm run lint && npm run tsd && npm run cov",

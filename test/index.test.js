@@ -121,6 +121,7 @@ describe('test/index.test.js', () => {
       yield client.ready();
       yield client.ready();
       assert(client.foo === 'bar');
+      assert(client.localStorage === undefined);
     });
 
     it('should trigger ready callback without err', done => {
