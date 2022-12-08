@@ -18,3 +18,14 @@ const client = new Client();
 expectType<Promise<void>>(client.readyOrTimeout(1000));
 expectType<Promise<any>>(client.ready());
 expectType<MockContenxt | undefined>(client.localStorage?.getStore());
+
+class ClientDefaultContext extends Base {
+  constructor() {
+    super({
+      initMethod: 'init',
+    });
+  }
+}
+
+const client2 = new ClientDefaultContext();
+expectType<any | undefined>(client2.localStorage?.getStore());

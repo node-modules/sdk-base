@@ -1,5 +1,6 @@
 /* =================== USAGE ===================
   import Base from "sdk-base";
+  class newSDK extends Base {}
   class newSDK extends Base<FooContext> {}
 =============================================== */
 
@@ -12,7 +13,7 @@ export interface BaseOptions {
   [key: string]: any;
 }
 
-export default class Base<TContext> extends EventEmitter {
+export default class Base<TContext = any> extends EventEmitter {
   constructor(option?: BaseOptions);
 
   isReady: boolean;

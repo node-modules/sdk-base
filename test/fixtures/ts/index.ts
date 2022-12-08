@@ -4,6 +4,8 @@ class FooContext {
   traceId?: string;
 }
 
+class ClientSimple extends Base {}
+
 class Client extends Base<FooContext> {
   errorHandlerLength: number = 0;
 
