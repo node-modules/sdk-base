@@ -1,4 +1,10 @@
 
+4.2.0 / 2022-12-09
+==================
+
+**features**
+  * [[`71d7ddd`](http://github.com/node-modules/sdk-base/commit/71d7ddd0c98f0c3c6ead65e1741ed5c54bd0eb38)] - 📦 NEW: Support localStorage getter (#21) (fengmk2 <<fengmk2@gmail.com>>)
+
 4.1.0 / 2022-12-03
 ==================
 
