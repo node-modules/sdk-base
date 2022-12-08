@@ -3,6 +3,7 @@ const pedding = require('pedding');
 const Base = require('..');
 const path = require('path');
 const runscript = require('runscript');
+const { AsyncLocalStorage } = require('async_hooks');
 const baseDir = path.join(__dirname, './fixtures/ts');
 
 function sleep(ms) {
@@ -191,13 +192,17 @@ describe('test/index.test.js', () => {
     }
 
     it('should auto init with options.initMethod', async () => {
-      const client = new Client({ a: 'a' });
-      assert.deepEqual(client.options, {
-        a: 'a',
-        initMethod: 'init',
+      const localStorage = new AsyncLocalStorage();
+      const client = new Client({ a: 'a', localStorage });
+      assert(client.options.initMethod === 'init');
+      assert(client.isReady === false);
+      await client.ready();
+      assert(client.localStorage.getStore() === undefined);
+      await client.localStorage.run({ foo: 'bar' }, async () => {
+        assert(client.localStorage.getStore().foo === 'bar');
       });
       await client.ready();
-      await client.ready();
+      assert(client.isReady === true);
       assert(client.foo === 'bar');
     });
 
