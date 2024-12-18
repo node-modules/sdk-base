@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.0.0](https://github.com/node-modules/sdk-base/compare/v4.2.1...v5.0.0) (2024-12-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop Node.js < 18.19.0 support
+
+part of https://github.com/eggjs/egg/issues/3644
+
+https://github.com/eggjs/egg/issues/5257
+
+### Features
+
+* support cjs and esm both by tshy ([#23](https://github.com/node-modules/sdk-base/issues/23)) ([cde6773](https://github.com/node-modules/sdk-base/commit/cde67730c06f6b614c30853f6ddaf936b786ecbf))
+
 ## [4.2.1](https://github.com/node-modules/sdk-base/compare/v4.2.0...v4.2.1) (2022-12-17)
 
 
