@@ -1,36 +1,39 @@
-sdk-base
----------------
+# sdk-base
 
 [![NPM version][npm-image]][npm-url]
 [![Node.js CI](https://github.com/node-modules/sdk-base/actions/workflows/nodejs.yml/badge.svg)](https://github.com/node-modules/sdk-base/actions/workflows/nodejs.yml)
-[![Test coverage][coveralls-image]][coveralls-url]
+[![Test coverage][codecov-image]][codecov-url]
+[![Known Vulnerabilities][snyk-image]][snyk-url]
 [![npm download][download-image]][download-url]
+[![Node.js Version](https://img.shields.io/node/v/sdk-base.svg?style=flat)](https://nodejs.org/en/download/)
 
 [npm-image]: https://img.shields.io/npm/v/sdk-base.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/sdk-base
-[coveralls-image]: https://img.shields.io/coveralls/node-modules/sdk-base.svg?style=flat-square
-[coveralls-url]: https://coveralls.io/r/node-modules/sdk-base?branch=master
+[codecov-image]: https://codecov.io/github/node-modules/sdk-base/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/node-modules/sdk-base?branch=master
+[snyk-image]: https://snyk.io/test/npm/sdk-base/badge.svg?style=flat-square
+[snyk-url]: https://snyk.io/test/npm/sdk-base
 [download-image]: https://img.shields.io/npm/dm/sdk-base.svg?style=flat-square
 [download-url]: https://npmjs.org/package/sdk-base
-
 
 A base class for sdk with some common & useful functions.
 
 ## Installation
 
 ```bash
-$ npm install sdk-base
+npm install sdk-base
 ```
 
 ## Usage
 
 Constructor argument:
+
 - {Object} options
   - {String} [initMethod] - the async init method name, the method should be a function return promise. If set, will execute the function in the constructor.
   - {AsyncLocalStorage} [localStorage] - async localStorage instance.
 
   ```js
-  const Base = require('sdk-base');
+  const { Base } = require('sdk-base');
 
   class Client extends Base {
     constructor() {
@@ -130,36 +133,23 @@ Constructor argument:
   const data = await client.await('data');
   ```
 
-- `.awaitFirst(event)`: [await the first event in a set of event pairs](https://github.com/node-modules/await-first), return a promise, and it will clean up after itself.
+- `._close()`: The `_close()` method is called by `close`.
+It can be overridden by child class, but should not be called directly. It must return promise or generator.
 
-  ```js
-  (async function main() {
-    const o = await client.awaitFirst([ 'foo', 'bar' ]);
-    if (o.event === 'foo') {
-      // ...
-    }
-    if (o.event === 'bar') {
-      // ...
-    }
-  })();
-  ```
-  
-- `._close()`: The `_close()` method is called by `close`, It can be overridden by child class, but should not be called directly. It must return promise or generator.
+- `.close()`: The `close()` method is used to close the instance.
 
-- `.close()`: The `close()` method is used to close the instance. 
+## Breaking changes between v4 and v5
+
+- Drop `.awaitFirst(events)` support
+- Drop generator function support
+- Don't catch event listener inside error
 
 ### License
 
 [MIT](LICENSE)
 
-<!-- GITCONTRIBUTOR_START -->
-
 ## Contributors
 
-|[<img src="https://avatars.githubusercontent.com/u/985607?v=4" width="100px;"/><br/><sub><b>dead-horse</b></sub>](https://github.com/dead-horse)<br/>|[<img src="https://avatars.githubusercontent.com/u/156269?v=4" width="100px;"/><br/><sub><b>fengmk2</b></sub>](https://github.com/fengmk2)<br/>|[<img src="https://avatars.githubusercontent.com/u/1207064?v=4" width="100px;"/><br/><sub><b>gxcsoccer</b></sub>](https://github.com/gxcsoccer)<br/>|[<img src="https://avatars.githubusercontent.com/u/360661?v=4" width="100px;"/><br/><sub><b>popomore</b></sub>](https://github.com/popomore)<br/>|[<img src="https://avatars.githubusercontent.com/u/2039144?v=4" width="100px;"/><br/><sub><b>sang4lv</b></sub>](https://github.com/sang4lv)<br/>|[<img src="https://avatars.githubusercontent.com/u/1474688?v=4" width="100px;"/><br/><sub><b>luckydrq</b></sub>](https://github.com/luckydrq)<br/>|
-| :---: | :---: | :---: | :---: | :---: | :---: |
-[<img src="https://avatars.githubusercontent.com/u/12656301?v=4" width="100px;"/><br/><sub><b>brizer</b></sub>](https://github.com/brizer)<br/>|[<img src="https://avatars.githubusercontent.com/u/6897780?v=4" width="100px;"/><br/><sub><b>killagu</b></sub>](https://github.com/killagu)<br/>
+[![Contributors](https://contrib.rocks/image?repo=node-modules/sdk-base)](https://github.com/node-modules/sdk-base/graphs/contributors)
 
-This project follows the git-contributor [spec](https://github.com/xudafeng/git-contributor), auto updated at `Sat Dec 03 2022 16:27:57 GMT+0800`.
-
-<!-- GITCONTRIBUTOR_END -->
+Made with [contributors-img](https://contrib.rocks).

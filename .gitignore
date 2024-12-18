@@ -6,13 +6,14 @@
 *.pid
 *.gz
 
-coverage.html
-coverage/
-cov/
-
 node_modules
 
 dump.rdb
 .DS_Store
 
 test/fixtures/**/*.js
+.tshy*
+.eslintcache
+dist
+coverage
+package-lock.json

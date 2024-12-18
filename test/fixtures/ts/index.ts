@@ -1,4 +1,4 @@
-import Base, { BaseOptions } from '../../..';
+import { Base, BaseOptions } from '../../../src/index.js';
 
 class FooContext {
   traceId?: string;
@@ -47,8 +47,7 @@ export async function test() {
     console.log('localStorage should be undefined: %o', client.localStorage?.getStore());
   });
   await client.await('someEvent');
-  await client.awaitFirst([ 'one', 'two' ]);
+  // await client.awaitFirst([ 'one', 'two' ]);
 
   return client.isReady;
-
 }
