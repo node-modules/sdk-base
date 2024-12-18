@@ -2,6 +2,7 @@ import util from 'node:util';
 import assert from 'node:assert';
 import { once } from 'node:events';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { getAsyncLocalStorage } from 'gals';
 import { ReadyEventEmitter } from 'get-ready';
 import { isPromise, isGeneratorFunction } from 'is-type-of';
 import { promiseTimeout } from 'utility';
@@ -12,28 +13,38 @@ export interface BaseOptions<T = any> {
   [key: string]: any;
 }
 
-export class Base<T = any> extends ReadyEventEmitter {
+export abstract class Base<T = any> extends ReadyEventEmitter {
   options: BaseOptions<T>;
   #closed = false;
+  #localStorage: AsyncLocalStorage<T>;
 
   constructor(options?: BaseOptions<T>) {
     super();
 
     if (options?.initMethod) {
-      const initMethod = Reflect.get(this, options.initMethod);
+      const initMethod = Reflect.get(this, options.initMethod) as () => Promise<void>;
       assert(typeof initMethod === 'function',
         `[sdk-base] this.${options.initMethod} should be a function`);
       assert(!isGeneratorFunction(initMethod),
-        `[sdk-base] this.${options.initMethod} generator function is not support`);
+        `[sdk-base] this.${options.initMethod} should not be generator function`);
 
       process.nextTick(() => {
         const ret = initMethod.apply(this);
         assert(isPromise(ret), `[sdk-base] this.${options.initMethod} should return a promise`);
-        ret.then(() => this.ready(true))
-          .catch(err => this.ready(err));
+        ret.then(() => {
+          this.ready(true);
+        }).catch(err => {
+          const hasReadyCallbacks = this.hasReadyCallbacks;
+          this.ready(err);
+          // no ready callbacks, should emit error event instead
+          if (!hasReadyCallbacks) {
+            this.emit('error', err);
+          }
+        });
       });
     }
     this.options = options ?? {};
+    this.#localStorage = this.options.localStorage ?? getAsyncLocalStorage<T>();
     this.on('error', err => {
       this._defaultErrorHandler(err);
     });
@@ -42,8 +53,9 @@ export class Base<T = any> extends ReadyEventEmitter {
   /**
    * support `await this.await('event')`
    */
-  await(event: string) {
-    return once(this, event);
+  async await(event: string) {
+    const values = await once(this, event);
+    return values[0];
   }
 
   /**
@@ -51,7 +63,7 @@ export class Base<T = any> extends ReadyEventEmitter {
    * @return {AsyncLocalStorage} asyncLocalStorage instance or undefined
    */
   get localStorage() {
-    return this.options.localStorage;
+    return this.#localStorage;
   }
 
   async readyOrTimeout(milliseconds: number) {
@@ -87,15 +99,19 @@ export class Base<T = any> extends ReadyEventEmitter {
       return;
     }
     this.#closed = true;
-    const closeFunc = Reflect.get(this, '_close');
-    if (typeof closeFunc !== 'function') {
+    const closeMethod = Reflect.get(this, '_close') as () => Promise<void>;
+    if (typeof closeMethod !== 'function') {
       return;
     }
 
     try {
-      await closeFunc.apply(this);
+      await closeMethod.apply(this);
     } catch (err) {
       this.emit('error', err);
     }
+  }
+
+  get isClosed() {
+    return this.#closed;
   }
 }

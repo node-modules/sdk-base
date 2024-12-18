@@ -1,25 +1,16 @@
-const assert = require('assert');
-const pedding = require('pedding');
-const Base = require('..');
-const path = require('path');
-const runscript = require('runscript');
-const { AsyncLocalStorage } = require('async_hooks');
-const baseDir = path.join(__dirname, './fixtures/ts');
+import { strict as assert } from 'node:assert';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import { scheduler } from 'node:timers/promises';
+import { Base, BaseOptions } from '../src/index.js';
 
-function sleep(ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
-}
-
-describe('test/index.test.js', () => {
+describe('test/index.test.ts', () => {
   class SomeServiceClient extends Base {}
 
   describe('default error handler', () => {
     it('should auto add the default error handler and show error message', () => {
       const c = new SomeServiceClient();
-      assert(c.listeners('error').length === 1);
-      const err = new Error('mock error 1');
+      assert.equal(c.listeners('error').length, 1);
+      const err: any = new Error('mock error 1');
       err.data = { foo: 'bar', url: '/foo' };
       err.status = 500;
       err.type = 'DUMP';
@@ -37,7 +28,7 @@ describe('test/index.test.js', () => {
     it('should not change the error name and show error message', done => {
       const c = new SomeServiceClient();
       setTimeout(function() {
-        assert(c.listeners('error').length === 1);
+        assert.equal(c.listeners('error').length, 1);
         const err = new Error('mock some error');
         err.name = 'SomeApiError';
         c.emit('error', err);
@@ -57,10 +48,10 @@ describe('test/index.test.js', () => {
     it('should use the exists error handler', done => {
       const c = new SomeServiceClient();
       c.on('error', function(err) {
-        assert(err.message === 'mock error 2');
+        assert.equal(err.message, 'mock error 2');
         done();
       });
-      assert(c.listeners('error').length === 2);
+      assert.equal(c.listeners('error').length, 2);
       c.emit('error', new Error('mock error 2'));
       // should not stderr output
     });
@@ -69,85 +60,44 @@ describe('test/index.test.js', () => {
   describe('ready', () => {
     it('should ready once', done => {
       const client = new SomeServiceClient();
-      assert(client.isReady === false);
+      assert.equal(client.isReady, false);
       client.ready(() => {
-        assert(client.isReady === true);
+        assert.equal(client.isReady, true);
         done();
       });
       client.ready(true);
-      assert(client.isReady === true);
+      assert.equal(client.isReady, true);
       // again should work
       client.ready(true);
-      assert(client.isReady === true);
+      assert.equal(client.isReady, true);
     });
   });
 
-  describe('options.initMethod support generator', () => {
+  describe('options.initMethod throw error when it is generator function', () => {
     class Client extends Base {
-      constructor(options) {
+      constructor(options: BaseOptions) {
         super(Object.assign({
           initMethod: 'init',
         }, options));
-        this.foo = 'foo';
       }
 
       * init() {
-        assert(this.foo === 'foo');
-        yield cb => setTimeout(cb, 500);
-        this.foo = 'bar';
+        // ignore
       }
     }
 
-    class Client2 extends Base {
-      constructor(options) {
-        super(Object.assign({
-          initMethod: 'init',
-        }, options));
-        this.foo = 'foo';
-      }
-
-      init() {
-        assert(this.foo === 'foo');
-        this.foo = 'bar';
-        return Promise.resolve();
-      }
-    }
-
-    it('should auto init with options.initMethod', function* () {
-      const client = new Client({ a: 'a' });
-      assert.deepEqual(client.options, {
-        a: 'a',
-        initMethod: 'init',
-      });
-      yield client.ready();
-      yield client.ready();
-      assert(client.foo === 'bar');
-      assert(client.localStorage === undefined);
-    });
-
-    it('should trigger ready callback without err', done => {
-      const client = new Client();
-      client.ready(err => {
-        assert.ifError(err);
-        done();
-      });
-    });
-
-    it('should support options.initMethod that return promise', function* () {
-      const client = new Client2({ a: 'a' });
-      assert.deepEqual(client.options, {
-        a: 'a',
-        initMethod: 'init',
-      });
-      yield client.ready();
-      yield client.ready();
-      assert(client.foo === 'bar');
+    it('should trigger ready callback without err', () => {
+      assert.throws(() => {
+        new Client({});
+      }, /\[sdk-base] this.init should not be generator function/);
     });
   });
 
   describe('options.initMethod support async function', () => {
     class Client extends Base {
-      constructor(options) {
+      foo: string;
+
+      constructor(options?: BaseOptions) {
         super(Object.assign({
           initMethod: 'init',
         }, options));
@@ -155,38 +105,43 @@ describe('test/index.test.js', () => {
       }
 
       async init() {
-        assert(this.foo === 'foo');
-        await sleep(500);
+        assert.equal(this.foo, 'foo');
+        await scheduler.wait(500);
         this.foo = 'bar';
       }
     }
 
     class Client2 extends Base {
-      constructor(options) {
-        super(Object.assign({
+      foo: string;
+
+      constructor(options: BaseOptions & { foo?: string }) {
+        super({
           initMethod: 'init',
-        }, options));
+          ...options,
+        });
         this.foo = 'foo';
       }
 
       async init() {
-        assert(this.foo === 'foo');
-        await sleep(500);
+        assert.equal(this.foo, 'foo');
+        await scheduler.wait(500);
         throw new Error('mock init error');
       }
     }
 
     class Client3 extends Base {
-      constructor(options) {
-        super(Object.assign({
+      foo: string;
+      constructor(options: BaseOptions & { a?: string; }) {
+        super({
           initMethod: 'init',
-        }, options));
+          ...options,
+        });
         this.foo = 'foo';
       }
 
       async init() {
-        assert(this.foo === 'foo');
-        await sleep(500);
+        assert.equal(this.foo, 'foo');
+        await scheduler.wait(500);
         throw new Error('mock ready error');
       }
     }
@@ -194,16 +149,30 @@ describe('test/index.test.js', () => {
     it('should auto init with options.initMethod', async () => {
       const localStorage = new AsyncLocalStorage();
       const client = new Client({ a: 'a', localStorage });
-      assert(client.options.initMethod === 'init');
-      assert(client.isReady === false);
+      assert.equal(client.options.initMethod, 'init');
+      assert.equal(client.isReady, false);
       await client.ready();
-      assert(client.localStorage.getStore() === undefined);
+      assert.equal(client.localStorage.getStore(), undefined);
       await client.localStorage.run({ foo: 'bar' }, async () => {
-        assert(client.localStorage.getStore().foo === 'bar');
+        assert.equal(client.localStorage.getStore().foo, 'bar');
       });
       await client.ready();
-      assert(client.isReady === true);
-      assert(client.foo === 'bar');
+      assert.equal(client.isReady, true);
+      assert.equal(client.foo, 'bar');
+    });
+
+    it('should get default als from gals', async () => {
+      const client = new Client({ a: 'a' });
+      assert.equal(client.options.initMethod, 'init');
+      assert.equal(client.isReady, false);
+      await client.ready();
+      assert.equal(client.localStorage.getStore(), undefined);
+      await client.localStorage.run({ foo: 'bar' }, async () => {
+        assert.equal(client.localStorage.getStore().foo, 'bar');
+      });
+      await client.ready();
+      assert.equal(client.isReady, true);
+      assert.equal(client.foo, 'bar');
     });
 
     it('should trigger ready callback without err', done => {
@@ -223,7 +192,8 @@ describe('test/index.test.js', () => {
       await assert.rejects(async () => {
         await client.ready();
       }, err => {
-        assert(err.message === 'mock init error');
+        assert(err instanceof Error);
+        assert.equal(err.message, 'mock init error');
         return true;
       });
     });
@@ -237,6 +207,7 @@ describe('test/index.test.js', () => {
       await assert.rejects(async () => {
         await client.ready();
       }, err => {
+        assert(err instanceof Error);
         assert(err.message === 'mock ready error');
         return true;
       });
@@ -244,7 +215,8 @@ describe('test/index.test.js', () => {
       await assert.rejects(async () => {
         await client.readyOrTimeout(10);
       }, err => {
-        assert(err.message === 'mock ready error');
+        assert(err instanceof Error);
+        assert.equal(err.message, 'mock ready error');
         return true;
       });
     });
@@ -252,7 +224,8 @@ describe('test/index.test.js', () => {
 
   describe('readyOrTimeout()', () => {
     class Client extends Base {
-      constructor(options) {
+      foo: string;
+      constructor(options: BaseOptions) {
         super(Object.assign({
           initMethod: 'init',
         }, options));
@@ -261,13 +234,14 @@ describe('test/index.test.js', () => {
 
       async init() {
         assert(this.foo === 'foo');
-        await sleep(500);
+        await scheduler.wait(500);
         this.foo = 'bar';
       }
     }
 
     class Client2 extends Base {
-      constructor(options) {
+      foo: string;
+      constructor(options: BaseOptions) {
         super(Object.assign({
           initMethod: 'init',
         }, options));
@@ -275,15 +249,15 @@ describe('test/index.test.js', () => {
       }
 
       async init() {
-        assert(this.foo === 'foo');
-        await sleep(500);
+        assert.equal(this.foo, 'foo');
+        await scheduler.wait(500);
         throw new Error('mock ready error');
       }
     }
 
     it('should ready timeout', async () => {
       const client = new Client({ a: 'a' });
-      await sleep(1);
+      await scheduler.wait(1);
       assert.deepEqual(client.options, {
         a: 'a',
         initMethod: 'init',
@@ -291,10 +265,9 @@ describe('test/index.test.js', () => {
       await assert.rejects(async () => {
         await client.readyOrTimeout(10);
       }, err => {
-        assert(err.name === 'TimeoutError');
-        // console.log('%o', client._readyCallbacks);
-        // console.log(client._readyCallbacks[0].toString());
-        assert(client._readyCallbacks.length === 0);
+        assert(err instanceof Error);
+        assert.equal(err.name, 'TimeoutError');
+        assert.equal(err.message, 'Timed out after 10ms');
         return true;
       });
 
@@ -305,11 +278,8 @@ describe('test/index.test.js', () => {
       await assert.rejects(async () => {
         await client.readyOrTimeout(10);
       }, err => {
-        assert(err.name === 'TimeoutError');
-        console.log('%o', client._readyCallbacks);
-        // console.log(client._readyCallbacks[0].toString());
-        assert(client._readyCallbacks.length === 1);
-        assert(client._readyCallbacks[0].name === 'readySuccessCallback');
+        assert(err instanceof Error);
+        assert.equal(err.name, 'TimeoutError');
         return true;
       });
       await client.ready();
@@ -336,7 +306,8 @@ describe('test/index.test.js', () => {
       await assert.rejects(async () => {
         await client.readyOrTimeout(510);
       }, err => {
-        assert(err.message === 'mock ready error');
+        assert(err instanceof Error);
+        assert.equal(err.message, 'mock ready error');
         return true;
       });
     });
@@ -350,36 +321,36 @@ describe('test/index.test.js', () => {
         });
       }
 
-      * init() {
-        yield cb => setTimeout(() => {
-          cb(new Error('init error'));
-        }, 500);
+      async init() {
+        await scheduler.wait(500);
+        throw new Error('init error');
       }
     }
 
-    it('should ready failed', function* () {
+    it('should ready failed', async () => {
       const client = new ErrorClient();
-      let initError = null;
-      try {
-        yield client.ready();
-      } catch (err) {
-        initError = err;
-      }
-      assert(initError && initError.message === 'init error');
+      await assert.rejects(async () => {
+        await client.ready();
+      }, err => {
+        assert(err instanceof Error);
+        assert.equal(err.message, 'init error');
+        return true;
+      });
 
-      initError = null;
-      try {
-        yield client.ready();
-      } catch (err) {
-        initError = err;
-      }
-      assert(initError && initError.message === 'init error');
+      await assert.rejects(async () => {
+        await client.ready();
+      }, err => {
+        assert(err instanceof Error);
+        assert.equal(err.message, 'init error');
+        return true;
+      });
     });
 
     it('should trigger ready callback with err', done => {
       const client = new ErrorClient();
       client.ready(err => {
-        assert(err && err.message === 'init error');
+        assert(err instanceof Error);
+        assert.equal(err.message, 'init error');
         done();
       });
     });
@@ -387,15 +358,17 @@ describe('test/index.test.js', () => {
     it('should emit error if ready failed', done => {
       const client = new ErrorClient();
       client.once('error', err => {
-        assert(err.message === 'init error');
+        assert.equal(err.message, 'init error');
         done();
       });
+      console.error('listen error');
     });
 
     it('should not emit error event if readyCallback not empty', done => {
       const client = new ErrorClient();
       client.ready(err => {
-        assert(err.message === 'init error');
+        assert(err instanceof Error);
+        assert.equal(err.message, 'init error');
         setImmediate(done);
       });
       client.once('error', () => {
@@ -404,40 +377,49 @@ describe('test/index.test.js', () => {
     });
   });
 
+  function padding(cb: () => void, count: number) {
+    return () => {
+      count--;
+      if (count === 0) {
+        cb();
+      }
+    };
+  }
+
   describe('generator event listener', () => {
     it('should add generator listener', done => {
-      done = pedding(done, 8);
+      done = padding(done, 8);
       const client = new SomeServiceClient();
 
-      client.addListener('event_code', function* (a, b) {
+      client.addListener('event_code', (a, b) => {
         console.log('event_code in addListener');
-        assert(a === 1);
-        assert(b === 2);
+        assert.equal(a, 1);
+        assert.equal(b, 2);
         done();
       });
 
-      client.on('event_code', function* (a, b) {
+      client.on('event_code', (a, b) => {
         console.log('event_code in on');
         assert(a === 1);
         assert(b === 2);
         done();
       });
 
-      client.once('event_code', function* (a, b) {
+      client.once('event_code', (a, b) => {
         console.log('event_code in once');
         assert(a === 1);
         assert(b === 2);
         done();
       });
 
-      client.prependListener('event_code', function* (a, b) {
+      client.prependListener('event_code', (a, b) => {
         console.log('event_code in prependListener');
         assert(a === 1);
         assert(b === 2);
         done();
       });
 
-      client.prependOnceListener('event_code', function* (a, b) {
+      client.prependOnceListener('event_code', (a, b) => {
         console.log('event_code in prependOnceListener');
         assert(a === 1);
         assert(b === 2);
@@ -448,29 +430,27 @@ describe('test/index.test.js', () => {
       client.emit('event_code', 1, 2);
     });
 
-    it('should catch generator exception and emit on error event', done => {
-      done = pedding(done, 2);
+    // Don't catch event listener inside error
+    // it('should catch generator exception and emit on error event', done => {
+    //   done = padding(done, 2);
+    //   const client = new SomeServiceClient();
+    //   client.on('error', err => {
+    //     assert(err.name === 'EventListenerProcessError');
+    //     assert(err.message === 'generator process exception');
+    //     done();
+    //   });
+    //   client.on('event_code', () => {
+    //     throw new Error('normal function process exception');
+    //   });
+    //   client.once('event_code', async () => {
+    //     throw new Error('async function process exception');
+    //   });
+    //   client.emit('event_code');
+    // });
+
+    it('should remove listener', done => {
       const client = new SomeServiceClient();
-      client.on('error', err => {
-        assert(err.name === 'EventListenerProcessError');
-        assert(err.message === 'generator process exception');
-        done();
-      });
-
-      client.on('event_code', function* () {
-        throw new Error('generator process exception');
-      });
-
-      client.once('event_code', function* () {
-        throw new Error('generator process exception');
-      });
-
-      client.emit('event_code');
-    });
-
-    it('should remove generator listener', done => {
-      const client = new SomeServiceClient();
-      const handler = function* (data) {
+      const handler = async (data: number) => {
         assert(data === 1);
         done();
       };
@@ -481,72 +461,61 @@ describe('test/index.test.js', () => {
       client.on('event_code', handler);
       client.emit('event_code', 1);
       client.removeListener('event_code', handler);
-      assert(client.listeners('event_code').length === 0);
+      assert.equal(client.listeners('event_code').length, 0);
     });
 
-    it('should not allow to add generator listener on error event', () => {
-      const client = new SomeServiceClient();
-      assert.throws(() => {
-        client.on('error', function* (err) {
-          console.error(err);
-        });
-      }, null, /\[sdk-base\] `error` event should not have a generator listener\./);
-    });
+    // it('should not allow to add generator listener on error event', () => {
+    //   const client = new SomeServiceClient();
+    //   assert.throws(() => {
+    //     client.on('error', function* (err) {
+    //       console.error(err);
+    //     });
+    //   }, null, /\[sdk-base\] `error` event should not have a generator listener\./);
+    // });
   });
 
-  describe('await && awaitFirst', () => {
-    it('should support client.await', function* () {
+  describe('await', () => {
+    it('should support client.await', async () => {
       const client = new SomeServiceClient();
       setTimeout(() => client.emit('someEvent', 'foo'), 100);
-      const res = yield client.await('someEvent');
-      assert(res === 'foo');
+      const res = await client.await('someEvent');
+      assert.equal(res, 'foo');
     });
 
-    it('should support client.awaitFirst', function* () {
-      const client = new SomeServiceClient();
-      setTimeout(() => client.emit('foo', 'foo'), 200);
-      setTimeout(() => client.emit('bar', 'bar'), 100);
-
-      const o = yield client.awaitFirst([ 'foo', 'bar' ]);
-      assert.deepEqual(o, {
-        event: 'bar',
-        args: [ 'bar' ],
-      });
-      assert(client.listenerCount('foo') === 0);
-      assert(client.listenerCount('bar') === 0);
-    });
-  });
-
-  describe('run as typescript', () => {
-    it('compile ts file and execute', async () => {
-      await runscript(`tsc -p ${baseDir}/tsconfig.json`, { cwd: baseDir });
-      const { test } = require('./fixtures/ts/index');
-      const result = await test();
-      assert.strictEqual(result, true);
-    });
+    // it('should support client.awaitFirst', function* () {
+    //   const client = new SomeServiceClient();
+    //   setTimeout(() => client.emit('foo', 'foo'), 200);
+    //   setTimeout(() => client.emit('bar', 'bar'), 100);
+    //   const o = yield client.awaitFirst([ 'foo', 'bar' ]);
+    //   assert.deepEqual(o, {
+    //     event: 'bar',
+    //     args: [ 'bar' ],
+    //   });
+    //   assert(client.listenerCount('foo') === 0);
+    //   assert(client.listenerCount('bar') === 0);
+    // });
   });
 
   describe('close', () => {
-    describe('generate close', () => {
-      class GenerateCloseClient extends Base {
-        * _close() {
-          yield cb => process.nextTick(() => {
-            cb();
-          });
-        }
-      }
-
-      it('should success', function* () {
-        const client = new GenerateCloseClient();
-        yield client.close();
-        assert(client._closed === true);
-      });
-    });
+    // describe('generate close', () => {
+    //   class GenerateCloseClient extends Base {
+    //     * _close() {
+    //       yield cb => process.nextTick(() => {
+    //         cb();
+    //       });
+    //     }
+    //   }
+    //   it('should success', function* () {
+    //     const client = new GenerateCloseClient();
+    //     yield client.close();
+    //     assert(client._closed === true);
+    //   });
+    // });
 
     describe('promise close', () => {
       class PromiseCloseClient extends Base {
         _close() {
-          return new Promise(resolve => {
+          return new Promise<void>(resolve => {
             process.nextTick(() => {
               resolve();
             });
@@ -554,26 +523,28 @@ describe('test/index.test.js', () => {
         }
       }
 
-      it('should success', function* () {
+      it('should success', async () => {
         const client = new PromiseCloseClient();
-        yield client.close();
-        assert(client._closed === true);
+        assert.equal(client.isClosed, false);
+        await client.close();
+        assert.equal(client.isClosed, true);
       });
     });
 
     describe('async function _close', () => {
       class PromiseCloseClient extends Base {
         async _close() {
-          await sleep(10);
+          await scheduler.wait(10);
         }
       }
 
       it('should success', async () => {
         const client = new PromiseCloseClient();
+        assert.equal(client.isClosed, false);
         await client.close();
-        assert(client._closed === true);
+        assert.equal(client.isClosed, true);
         await client.close();
-        assert(client._closed === true);
+        assert.equal(client.isClosed, true);
       });
     });
 
@@ -581,10 +552,11 @@ describe('test/index.test.js', () => {
       class NoCloseClient extends Base {
       }
 
-      it('should success', function* () {
+      it('should success', async () => {
         const client = new NoCloseClient();
-        yield client.close();
-        assert(client._closed === true);
+        assert.equal(client.isClosed, false);
+        await client.close();
+        assert.equal(client.isClosed, true);
       });
     });
 
@@ -597,7 +569,7 @@ describe('test/index.test.js', () => {
       class PromiseCloseClient extends Base {
         _close() {
           calledTimes++;
-          return new Promise(resolve => {
+          return new Promise<void>(resolve => {
             process.nextTick(() => {
               resolve();
             });
@@ -606,23 +578,23 @@ describe('test/index.test.js', () => {
       }
 
       describe('serial close', () => {
-        it('should success', function* () {
+        it('should success', async () => {
           const client = new PromiseCloseClient();
-          yield client.close();
-          yield client.close();
-          assert(client._closed === true);
+          await client.close();
+          await client.close();
+          assert(client.isClosed === true);
           assert(calledTimes === 1);
         });
       });
 
       describe('parallel close', () => {
-        it('should success', function* () {
+        it('should success', async () => {
           const client = new PromiseCloseClient();
-          yield [
+          await Promise.all([
             client.close(),
             client.close(),
-          ];
-          assert(client._closed === true);
+          ]);
+          assert.equal(client.isClosed, true);
           assert(calledTimes === 1);
         });
       });
@@ -631,21 +603,22 @@ describe('test/index.test.js', () => {
     describe('error close', () => {
       class ErrorCloseClient extends Base {
         _close() {
-          return new Promise((resolve, reject) => {
+          return new Promise((_, reject) => {
             reject(new Error('mock error'));
           });
         }
       }
 
-      it('should success', function* () {
+      it('should success', async () => {
         const client = new ErrorCloseClient();
-        let error;
+        let error: Error;
         client.on('error', e => {
           error = e;
         });
-        yield client.close();
-        assert(client._closed === true);
-        assert(error);
+        await client.close();
+        assert.equal(client.isClosed, true);
+        assert(error!);
+        assert(error instanceof Error);
         assert(/mock error/.test(error.message));
       });
     });

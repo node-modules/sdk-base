@@ -142,6 +142,7 @@ It can be overridden by child class, but should not be called directly. It must 
 
 - Drop `.awaitFirst(events)` support
 - Drop generator function support
+- Don't catch event listener inside error
 
 ### License
 

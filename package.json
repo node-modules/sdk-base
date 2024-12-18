@@ -20,7 +20,8 @@
     "node": ">= 18.19.0"
   },
   "dependencies": {
-    "get-ready": "^3.3.0",
+    "gals": "^1.0.2",
+    "get-ready": "^3.4.0",
     "is-type-of": "^2.2.0",
     "utility": "^2.3.0"
   },
@@ -32,7 +33,6 @@
     "egg-bin": "6",
     "eslint": "8",
     "eslint-config-egg": "14",
-    "runscript": "^2.0.1",
     "tshy": "3",
     "tshy-after": "1",
     "typescript": "5"
@@ -40,9 +40,9 @@
   "scripts": {
     "lint": "eslint --cache src test --ext .ts",
     "pretest": "npm run lint -- --fix && npm run prepublishOnly",
-    "test": "egg-bin test",
+    "test": "egg-bin test -p --timeout 5000",
     "preci": "npm run lint && npm run prepublishOnly && attw --pack",
-    "ci": "egg-bin cov",
+    "ci": "egg-bin cov -p",
     "prepublishOnly": "tshy && tshy-after"
   },
   "type": "module",
@@ -70,5 +70,6 @@
     "src"
   ],
   "types": "./dist/commonjs/index.d.ts",
-  "main": "./dist/commonjs/index.js"
+  "main": "./dist/commonjs/index.js",
+  "module": "./dist/esm/index.js"
 }
