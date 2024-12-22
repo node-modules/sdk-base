@@ -1,6 +1,6 @@
 {
   "name": "sdk-base",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "a base class for sdk with default error handler",
   "keywords": [
     "sdk",

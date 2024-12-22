@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/node-modules/sdk-base/compare/v5.0.0...v5.0.1) (2024-12-22)
+
+
+### Bug Fixes
+
+* allow sub class to override event methods ([#24](https://github.com/node-modules/sdk-base/issues/24)) ([d1ffb61](https://github.com/node-modules/sdk-base/commit/d1ffb61266aaec6028c39a6754671a555e41a6b7))
+
 ## [5.0.0](https://github.com/node-modules/sdk-base/compare/v4.2.1...v5.0.0) (2024-12-18)
 
 
