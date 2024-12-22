@@ -45,7 +45,7 @@ export abstract class Base<T = any> extends ReadyEventEmitter {
     }
     this.options = options ?? {};
     this.#localStorage = this.options.localStorage ?? getAsyncLocalStorage<T>();
-    this.on('error', err => {
+    super.on('error', err => {
       this._defaultErrorHandler(err);
     });
   }
