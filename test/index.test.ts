@@ -6,7 +6,23 @@ import { Base, BaseOptions } from '../src/index.js';
 describe('test/index.test.ts', () => {
   class SomeServiceClient extends Base {}
 
+  class SomeServiceClient2 extends Base {
+    protected _lists: any[] = [];
+
+    on(...args: any[]) {
+      this._lists.push(args);
+      super.on(args[0], args[1]);
+      return this;
+    }
+  }
+
   describe('default error handler', () => {
+    it('should allow subclass to override on methods', () => {
+      const c = new SomeServiceClient2();
+      c.on('error', () => {});
+      assert.equal(c.listeners('error').length, 2);
+    });
+
     it('should auto add the default error handler and show error message', () => {
       const c = new SomeServiceClient();
       assert.equal(c.listeners('error').length, 1);
