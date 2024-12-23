@@ -98,14 +98,17 @@ export abstract class Base<T = any> extends ReadyEventEmitter {
     if (this.#closed) {
       return;
     }
-    this.#closed = true;
-    const closeMethod = Reflect.get(this, '_close') as () => Promise<void>;
+    const closeMethod = Reflect.get(this, '_close');
+
     if (typeof closeMethod !== 'function') {
+      this.#closed = true;
       return;
     }
 
     try {
-      await closeMethod.apply(this);
+      const result = await closeMethod.apply(this);
+      this.#closed = true;
+      return result;
     } catch (err) {
       this.emit('error', err);
     }
