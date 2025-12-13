@@ -26,7 +26,7 @@
     "utility": "^2.3.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.17.1",
+    "@arethetypeswrong/cli": "^0.18.0",
     "@eggjs/tsconfig": "1",
     "@types/mocha": "10",
     "@types/node": "22",
