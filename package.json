@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.0",
-    "@eggjs/tsconfig": "1",
+    "@eggjs/tsconfig": "3",
     "@types/mocha": "10",
     "@types/node": "22",
     "egg-bin": "6",
