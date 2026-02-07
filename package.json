@@ -31,7 +31,7 @@
     "@types/mocha": "10",
     "@types/node": "22",
     "egg-bin": "6",
-    "eslint": "8",
+    "eslint": "10",
     "eslint-config-egg": "14",
     "tshy": "3",
     "tshy-after": "1",
