@@ -35,7 +35,7 @@
     "eslint-config-egg": "14",
     "tshy": "3",
     "tshy-after": "1",
-    "typescript": "5"
+    "typescript": "6"
   },
   "scripts": {
     "lint": "eslint --cache src test --ext .ts",
