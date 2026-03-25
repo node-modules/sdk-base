@@ -33,7 +33,7 @@
     "egg-bin": "6",
     "eslint": "8",
     "eslint-config-egg": "14",
-    "tshy": "3",
+    "tshy": "4",
     "tshy-after": "1",
     "typescript": "5"
   },
