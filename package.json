@@ -29,7 +29,7 @@
     "@arethetypeswrong/cli": "^0.18.0",
     "@eggjs/tsconfig": "1",
     "@types/mocha": "10",
-    "@types/node": "22",
+    "@types/node": "26",
     "egg-bin": "6",
     "eslint": "8",
     "eslint-config-egg": "14",
